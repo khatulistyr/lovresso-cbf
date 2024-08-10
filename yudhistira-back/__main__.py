@@ -1,9 +1,12 @@
 import os
 from recommend import load_data as load_data_recommend, recommend_items
 from search import load_data as load_data_search, search_items
+import pandas as pd
 
 def main_menu():
     file_path = 'menu_data.xlsx'
+    df = pd.read_excel('menu_data.xlsx')
+    df.to_json('./menu_data.json', orient='records', lines=True)
     
     while True:
         print("\nMenu:")

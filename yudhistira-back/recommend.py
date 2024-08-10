@@ -20,6 +20,13 @@ def recommend_items(item_name, df):
     
     recommended = []
     for i, score in sim_scores:
-        recommended.append((df.iloc[i]['Name'], df.iloc[i]['Features'], score))
+        recommended.append({
+            'name': df.iloc[i]['Name'],
+            'category': df.iloc[i]['Category'],
+            'description': df.iloc[i]['Description'],
+            # 'price': df.iloc[i]['Price'],
+            'tags': df.iloc[i]['Tags'],
+            # 'score': score
+        })
     
     return recommended

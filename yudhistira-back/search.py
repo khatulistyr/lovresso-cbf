@@ -18,6 +18,13 @@ def search_items(query, df):
     
     search_results = []
     for idx in top_indices:
-        search_results.append((df.iloc[idx]['Name'], df.iloc[idx]['Features'], cosine_sim[idx]))
+        search_results.append({
+            'name': df.iloc[idx]['Name'],
+            'category': df.iloc[idx]['Category'],
+            'description': df.iloc[idx]['Description'],
+            # 'price': df.iloc[idx]['Price'],
+            'tags': df.iloc[idx]['Tags'],
+            # 'score': cosine_sim[idx]
+        })
     
     return search_results
