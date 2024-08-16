@@ -1,26 +1,19 @@
 import React, { useState } from 'react';
 import axios from 'axios';
-import { Container, TextField, Typography, Card, CardContent, CardMedia, Grid, Stack, IconButton, Checkbox, FormControlLabel, InputAdornment } from '@mui/material';
+import { Container, TextField, Typography, Card, CardContent, CardMedia, Grid, Stack, IconButton, InputAdornment } from '@mui/material';
 import ItemDetailPage from './ItemDetailPage';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
+import { TextLoop } from 'easy-react-text-loop';
 
 function SearchPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
     const [showSearchResults, setShowSearchResults] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
-    // const [debugMode, setDebugMode] = useState(false);
     const [debugMode, setDebugMode] = useState(true);
 
-    // botched attempt at fixing the transition issue at 4am
-    function sleep(milliseconds) { 
-        const date = Date.now();
-        let currentDate = null;
-        do {
-          currentDate = Date.now();
-        } while (currentDate - date < milliseconds);
-      }
+    // const headlineVars = ['coffee', 'food', 'dessert', 'snacks', 'beverages'];
 
     const handleSearch = async () => {
         try {
@@ -58,16 +51,11 @@ function SearchPage() {
         setSelectedItem(null);
     };
 
-    const handleDebugModeChange = (event) => {
-        setDebugMode(event.target.checked);
-    };
-
     return (
         <Container
             style={{
                 margin: '0',
-                // backgroundImage: 'url(/bg.png), linear-gradient(to bottom, transparent, black)',
-                backgroundImage: 'url(/bg2.jpg), linear-gradient(to bottom, transparent, black)',
+                backgroundImage: 'linear-gradient(rgba(0, 0, 0, 0.7), rgba(0, 0, 0, 0.7)), url(/bg2.jpg)',
                 backgroundSize: 'cover',
                 backgroundPosition: 'center',
                 backgroundAttachment: 'fixed',
@@ -77,14 +65,30 @@ function SearchPage() {
                 paddingBottom: '20px',
                 backgroundColor: 'black',
                 display: 'flex',
-                // alignItems: showSearchResults ? 'flex-start' : 'center',  // Center vertically if no search results
-                alignItems: 'center',  // Center vertically if no search results
+                alignItems: 'center',
                 justifyContent: 'center',
                 transition: 'all 0.5s ease-in', // Smooth transition
             }}
         >
             <Container maxWidth="md">
+                {!showSearchResults && (
+                    <div>
+                        {/* <Typography variant="h4" style={{ align: 'center', color: 'white' }}>
+                            Lovresso Coffee.
+                        </Typography> */}
+                        <Typography variant="h2" style={{marginBottom: '10px', color: 'white' }}>
+                            {"Tempat nyari "}
+                            <TextLoop interval="{5000}">
+                                <span style={{color: "gold"}}>kopi.</span>
+                                <span style={{color: "gold"}}>snack.</span>
+                                <span style={{color: "gold"}}>jodoh.</span>
+                            </TextLoop>
+                        </Typography>
+                        {/* <span>.</span> */}
+                    </div>
+                )}
                 <Card
+                    // Main Card
                     variant='outlined'
                     style={{
                         padding: '0 10px 0 10px',
@@ -92,7 +96,6 @@ function SearchPage() {
                         maxHeight: '95vh',
                         display: 'flex',
                         flexDirection: 'column',
-                        // transform: showSearchResults ? 'translateY(0)' : 'translateY(-50%)',  // Animate position change
                         transition: 'all 0.5s ease-out', // Smooth transition
                     }}
                 >
@@ -100,7 +103,7 @@ function SearchPage() {
                         <TextField
                             variant="outlined"
                             fullWidth
-                            placeholder="Cari kopi, snack, jodoh.."
+                            placeholder={`Cari kopi, snack, jodoh..`}
                             label="Cari item"
                             value={searchQuery}
                             onChange={(e) => setSearchQuery(e.target.value)}
@@ -119,10 +122,6 @@ function SearchPage() {
                                 ),
                             }}
                         />
-                        {/* <FormControlLabel
-                            control={<Checkbox checked={debugMode} onChange={handleDebugModeChange} />}
-                            label="Debug"
-                        /> */}
                     </Stack>
 
                     {showSearchResults && (
@@ -148,10 +147,10 @@ function SearchPage() {
                                                                 alt={item.name}
                                                             />
                                                             <CardContent>
-                                                                <Typography variant="h6">{item.name}</Typography>
-                                                                <Typography variant="body2"><strong>Category:</strong> {item.category}</Typography>
+                                                                <Typography variant="h5">{item.name}</Typography>
+                                                                <Typography variant="h6">Rp. {item.price}</Typography>
                                                                 <Typography variant="body2"><strong>Description:</strong> {item.description}</Typography>
-                                                                <Typography variant="body2"><strong>Price:</strong> {item.price}</Typography>
+                                                                <Typography variant="body2"><strong>Category:</strong> {item.category}</Typography>
                                                                 {debugMode && (
                                                                     <>
                                                                         <Typography variant="body2"><strong>Tags:</strong> {item.tags}</Typography>

@@ -1,5 +1,6 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
+import { Container } from '@mui/material';
 import SearchPage from './SearchPage';
 import ItemDetailPage from './ItemDetailPage';
 import AdminPanel from './components/AdminPanel';
@@ -9,14 +10,27 @@ import AdminPanel from './components/AdminPanel';
 function App() {
     return (
         <Router>
-            <Routes>
-                <Route path="/" element={<SearchPage />} />
-                <Route path="/item/:id" element={<ItemDetailPage />} />
-                {/* <Route path="/test" element={<TestPage />} /> */}
-                {/* <Route path="/login" element={<LoginPage />} /> */}
-                {/* <Route path="/admin" element={isAuthenticated ? <AdminPanel /> : <Navigate to="/login" />} /> */}
-                <Route path="/admin" element={<AdminPanel />}/>
-            </Routes>
+            <Container
+                style={{
+                    margin: '0',
+                    backgroundColor: 'black',
+                    minHeight: '100vh',
+                    minWidth: '100vw',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    transition: 'all 0.5s ease-in', // Smooth transition
+                }}
+            >
+                <Routes>
+                    <Route path="/" element={<SearchPage />} />
+                    <Route path="/item/:id" element={<ItemDetailPage />} />
+                    {/* <Route path="/test" element={<TestPage />} /> */}
+                    {/* <Route path="/login" element={<LoginPage />} /> */}
+                    {/* <Route path="/admin" element={isAuthenticated ? <AdminPanel /> : <Navigate to="/login" />} /> */}
+                    <Route path="/admin" element={<AdminPanel />}/>
+                </Routes>
+            </Container>
         </Router>
     );
 }
