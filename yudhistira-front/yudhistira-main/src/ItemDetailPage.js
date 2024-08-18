@@ -36,7 +36,7 @@ function ItemDetailPage({ item, onBack, debugMode }) {
             <Button onClick={onBack} variant="text" color="primary" sx={{ mb: 2 }} startIcon={<ArrowBackIcon />}>
                 Kembali
             </Button>
-            <Card sx={{ mb: 4 }}>
+            <Card variant="outlined" sx={{ mb: 4 }}>
                 <CardMedia
                     component="img"
                     height="300"
@@ -65,7 +65,7 @@ function ItemDetailPage({ item, onBack, debugMode }) {
             <Grid container spacing={3}>
                 {recommendedItems.map((recommendedItem, index) => (
                     <Grid item xs={12} sm={6} key={recommendedItem.id}>
-                        <Card onClick={() => handleRecommendedItemClick(recommendedItem)}>
+                        <Card variant='outlined' onClick={() => handleRecommendedItemClick(recommendedItem)}>
                             <CardMedia
                                 component="img"
                                 height="140"
