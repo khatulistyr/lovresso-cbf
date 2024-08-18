@@ -1,35 +1,36 @@
 bcrypt==4.2.0
-blinker @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/blinker_1699238202041/work
-Bottleneck @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_e7wwl52wn1/croot/bottleneck_1709075893359/work
-click @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/click_1699237822453/work
-et-xmlfile @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/et_xmlfile_1699245044998/work
-Flask @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_b6zka5i2cn/croot/flask_1716545886197/work
+blinker==1.6.2
+Bottleneck==1.3.7
+click==8.1.7
+et-xmlfile==1.1.0
+Flask==3.0.3
 Flask-Bcrypt==1.0.1
-Flask-Cors @ file:///tmp/build/80754af9/flask-cors_1609957731919/work
+Flask-Cors==3.0.10
 Flask-Login==0.6.3
 Flask-SQLAlchemy==3.1.1
 Flask-Uploads==0.2.1
-itsdangerous @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_00jdi1gu23/croot/itsdangerous_1716533346702/work
-Jinja2 @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_44yzu12j7f/croot/jinja2_1716993410427/work
+itsdangerous==2.2.0
+Jinja2==3.1.4
 joblib==1.4.2
-MarkupSafe @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/markupsafe_1707339878470/work
+MarkupSafe==2.1.3
 nltk==3.8.1
-numexpr @ file:///Users/builder/cbouss/perseverance-python-buildout/croot/numexpr_1699237935415/work
-numpy @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a51i_mbs7m/croot/numpy_and_numpy_base_1708638620867/work/dist/numpy-1.26.4-cp312-cp312-macosx_11_0_arm64.whl#sha256=37afb6b734a197702d848df93bd67c10b52f6467d56e518950d84b6b1c949d27
-openpyxl @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_96hhik4ygv/croot/openpyxl_1721752931204/work
-pandas @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_b53hgou29t/croot/pandas_1718308972393/work/dist/pandas-2.2.2-cp312-cp312-macosx_11_0_arm64.whl#sha256=1956b71d1baac8b370fd9deac6100aadefda112447dca816a81ecbf3ea4eb3e6
-python-dateutil @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_66ud1l42_h/croot/python-dateutil_1716495741162/work
-pytz @ file:///private/var/folders/k1/30mswbxs7r1g6zwn8y4fyt500000gp/T/abs_a4b76c83ik/croot/pytz_1713974318928/work
+numexpr==2.8.7
+numpy==1.26.4
+openpyxl==3.1.5
+pandas==2.2.2
+pip==24.0
+python-dateutil==2.9.0.post0
+pytz==2024.1
 regex==2024.7.24
 scikit-learn==1.5.1
 scipy==1.14.0
 setuptools==72.1.0
-six @ file:///tmp/build/80754af9/six_1644875935023/work
+six==1.16.0
 SQLAlchemy==2.0.32
 tabulate==0.9.0
 threadpoolctl==3.5.0
 tqdm==4.66.5
 typing_extensions==4.12.2
-tzdata @ file:///croot/python-tzdata_1690578112552/work
-Werkzeug @ file:///private/var/folders/nz/j6p8yfhx1mv_0grj5xl4650h0000gp/T/abs_5bnbxlhunm/croot/werkzeug_1716533322814/work
+tzdata==2023.3
+Werkzeug==3.0.3
 wheel==0.43.0
