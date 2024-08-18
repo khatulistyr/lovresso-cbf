@@ -35,13 +35,13 @@ const AdminPanel = () => {
 
     useEffect(() => {
         if (isAuthenticated) {
-            axios.get('http://127.0.0.1:5000/api/items').then(response => setItems(response.data));
+            axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/items`).then(response => setItems(response.data));
         }
     }, [isAuthenticated]);
 
     const handleLogin = async () => {
       try {
-          const response = await axios.post('http://127.0.0.1:5000/auth/login', { username, password });
+          const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/auth/login`, { username, password });
           const token = response.data.token;
           localStorage.setItem('authToken', token);
           axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
@@ -57,7 +57,7 @@ const AdminPanel = () => {
   
   const handleLogout = async () => {
       try {
-          await axios.post('http://127.0.0.1:5000/auth/logout');
+          await axios.post(`${process.env.REACT_APP_API_BASE_URL}/auth/logout`);
           localStorage.removeItem('authToken');
           delete axios.defaults.headers.common['Authorization'];
           setIsAuthenticated(false);
@@ -79,7 +79,7 @@ const AdminPanel = () => {
     };
 
     const handleDeleteClick = (id) => {
-        axios.delete(`http://127.0.0.1:5000/api/items/${id}`).then(() => {
+        axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/items/${id}`).then(() => {
             setItems(items.filter(item => item.id !== id));
         });
     };
@@ -87,13 +87,13 @@ const AdminPanel = () => {
     const handleSave = (item) => {
         if (item.id) {
             // Update existing item
-            axios.put(`http://127.0.0.1:5000/api/items/${item.id}`, item).then(() => {
+            axios.put(`${process.env.REACT_APP_API_BASE_URL}/api/items/${item.id}`, item).then(() => {
                 setItems(items.map(i => (i.id === item.id ? item : i)));
                 setOpenDialog(false);
             });
         } else {
             // Add new item
-            axios.post('http://127.0.0.1:5000/api/items', item).then(response => {
+            axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/items`, item).then(response => {
                 setItems([...items, response.data]);
                 setOpenDialog(false);
             });

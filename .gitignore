@@ -4,3 +4,5 @@ yudhistira-back/.DS_Store
 *.pyc
 .DS_Store
 /node_modules
+yudhistira-front/yudhistira-main/.env
+*.pyc

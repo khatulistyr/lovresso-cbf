@@ -8,7 +8,7 @@ export const useAuth = () => {
     useEffect(() => {
         const checkAuth = async () => {
             try {
-                const response = await axios.get('http://127.0.0.1:5000/auth/check', {
+                const response = await axios.get(`${process.env.REACT_APP_API_BASE_URL}/auth/check`, {
                     headers: {
                         'Authorization': `Bearer ${localStorage.getItem('authToken')}`
                     }
