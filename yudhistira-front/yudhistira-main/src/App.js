@@ -13,7 +13,7 @@ function App() {
             <Container
                 style={{
                     margin: '0',
-                    backgroundColor: 'black',
+                    backgroundColor: 'white',
                     minHeight: '100vh',
                     minWidth: '100vw',
                     display: 'flex',

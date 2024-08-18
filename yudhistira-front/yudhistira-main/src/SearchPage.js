@@ -11,9 +11,7 @@ function SearchPage() {
     const [searchResults, setSearchResults] = useState([]);
     const [showSearchResults, setShowSearchResults] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
-    const [debugMode, setDebugMode] = useState(true);
-
-    // const headlineVars = ['coffee', 'food', 'dessert', 'snacks', 'beverages'];
+    const [debugMode, setDebugMode] = useState(false);
 
     const handleSearch = async () => {
         try {
@@ -73,56 +71,87 @@ function SearchPage() {
             <Container maxWidth="md">
                 {!showSearchResults && (
                     <div>
-                        {/* <Typography variant="h4" style={{ align: 'center', color: 'white' }}>
-                            Lovresso Coffee.
-                        </Typography> */}
-                        <Typography variant="h2" style={{marginBottom: '10px', color: 'white' }}>
+                        <Typography variant="h2" style={{ marginBottom: '0px', color: 'white' }}>
                             {"Tempat nyari "}
-                            <TextLoop interval="{5000}">
-                                <span style={{color: "gold"}}>kopi.</span>
-                                <span style={{color: "gold"}}>snack.</span>
-                                <span style={{color: "gold"}}>jodoh.</span>
+                            <TextLoop interval={5000}>
+                                <span style={{ color: "gold" }}>kopi.</span>
+                                <span style={{ color: "gold" }}>snack.</span>
+                                <span style={{ color: "gold" }}>jodoh.</span>
                             </TextLoop>
                         </Typography>
-                        {/* <span>.</span> */}
                     </div>
                 )}
-                <Card
-                    // Main Card
-                    variant='outlined'
-                    style={{
-                        padding: '0 10px 0 10px',
-                        minHeight: showSearchResults ? '95vh' : '0vh',
-                        maxHeight: '95vh',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        transition: 'all 0.5s ease-out', // Smooth transition
-                    }}
-                >
-                    <Stack direction="row" spacing={2} alignItems="center" m={2} style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 1 }}>
-                        <TextField
-                            variant="outlined"
-                            fullWidth
-                            placeholder={`Cari kopi, snack, jodoh..`}
-                            label="Cari item"
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            onKeyPress={handleKeyPress}
-                            margin="normal"
-                            InputProps={{
-                                endAdornment: (
-                                    <InputAdornment position="end">
+                
+                {/* Conditionally render the search bar outside the card when showSearchResults is false */}
+                {!showSearchResults && (
+                    // <Stack direction="row" spacing={2} alignItems="center" m={2} style={{ backgroundColor: 'white', zIndex: 1 }}>
+                    <TextField
+                        variant="outlined"
+                        fullWidth
+                        placeholder={"Cari kopi, snack, jodoh.."}
+                        label="Cari item"
+                        value={searchQuery}
+                        onChange={(e) => setSearchQuery(e.target.value)}
+                        onKeyPress={handleKeyPress}
+                        margin="normal"
+                        style={{ backgroundColor: 'white', borderRadius: '4px'}}
+                        InputProps={{
+                            endAdornment: (
+                                <InputAdornment position="end">
+                                    {searchQuery && (
                                         <IconButton onClick={handleClearSearch}>
                                             <ClearIcon />
                                         </IconButton>
-                                        <IconButton onClick={handleSearch}>
-                                            <SearchIcon />
-                                        </IconButton>
-                                    </InputAdornment>
-                                ),
-                            }}
-                        />
-                    </Stack>
+                                    )}
+                                    <IconButton onClick={handleSearch}>
+                                        <SearchIcon />
+                                    </IconButton>
+                                </InputAdornment>
+                            ),
+                        }}
+                    />
+                    // </Stack>
+                )}
+                
+                {showSearchResults && (
+                    <Card
+                        // Main Card
+                        variant='outlined'
+                        style={{
+                            padding: '0 10px 0 10px',
+                            minHeight: showSearchResults ? '95vh' : '0vh',
+                            maxHeight: '95vh',
+                            display: 'flex',
+                            flexDirection: 'column',
+                            transition: 'all 0.5s ease-out', // Smooth transition
+                        }}
+                    >   
+                        <Stack direction="row" spacing={2} alignItems="center" m={2} style={{ position: 'sticky', top: 0, backgroundColor: 'white', zIndex: 1 }}>
+                            <TextField
+                                variant="outlined"
+                                fullWidth
+                                placeholder={`Cari kopi, snack, jodoh..`}
+                                label="Cari item"
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                onKeyPress={handleKeyPress}
+                                margin="normal"
+                                InputProps={{
+                                    endAdornment: (
+                                        <InputAdornment position="end">
+                                            {searchQuery && (
+                                                <IconButton onClick={handleClearSearch}>
+                                                    <ClearIcon />
+                                                </IconButton>
+                                            )}
+                                            <IconButton onClick={handleSearch}>
+                                                <SearchIcon />
+                                            </IconButton>
+                                        </InputAdornment>
+                                    ),
+                                }}
+                            />
+                        </Stack>
 
                     {showSearchResults && (
                         <CardContent style={{ overflowY: 'auto' }}>
@@ -145,7 +174,7 @@ function SearchPage() {
                                                                 height="140"
                                                                 image={item.image_url}
                                                                 alt={item.name}
-                                                            />
+                                                                />
                                                             <CardContent>
                                                                 <Typography variant="h5">{item.name}</Typography>
                                                                 <Typography variant="h6">Rp. {item.price}</Typography>
@@ -169,6 +198,7 @@ function SearchPage() {
                         </CardContent>
                     )}
                 </Card>
+                )}
             </Container>
         </Container>
     );
