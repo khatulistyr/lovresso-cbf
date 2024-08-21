@@ -84,8 +84,8 @@ def recommend():
 
 @app.route('/api/search', methods=['POST'])
 def search():
-    data = request.json
-    query = data.get('query')
+    data = request.get_json()
+    query = data.get('query', '')
     df = load_data()
     search_results = search_items(query, df)
     return jsonify(search_results)

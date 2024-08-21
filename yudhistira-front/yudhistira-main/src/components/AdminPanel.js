@@ -113,7 +113,7 @@ const AdminPanel = () => {
     );
     
     return (
-        <Container>
+        <Container style={{padding: '10px'}}>
             {!isAuthenticated ? (
                 <Dialog open={loginDialogOpen} onClose={() => setLoginDialogOpen(false)}>
                     <DialogTitle>Login</DialogTitle>

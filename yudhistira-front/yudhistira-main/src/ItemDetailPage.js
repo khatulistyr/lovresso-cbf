@@ -8,23 +8,23 @@ function ItemDetailPage({ item, onBack, debugMode, categoryName }) {
     const [categories, setCategories] = useState([]); // Added state for categories
     const [currentItem, setCurrentItem] = useState(item);
 
-    useEffect(() => {
-        const fetchRecommendations = async () => {
-            try {
-                const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/recommend`, {
-                    item_name: currentItem.item_name
-                }, {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
-                });
-                setRecommendedItems(Array.isArray(response.data) ? response.data : []);
-            } catch (error) {
-                console.error('Error fetching recommendations:', error);
-                setRecommendedItems([]);
-            }
-        };
+    const fetchRecommendations = async () => {
+        try {
+            const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/recommend`, {
+                item_name: currentItem.item_name
+            }, {
+                headers: {
+                    'Content-Type': 'application/json'
+                }
+            });
+            setRecommendedItems(Array.isArray(response.data) ? response.data : []);
+        } catch (error) {
+            console.error('Error fetching recommendations:', error);
+            setRecommendedItems([]);
+        }
+    };
 
+    useEffect(() => {
         fetchRecommendations();
     }, [currentItem.name]);
 
@@ -36,6 +36,7 @@ function ItemDetailPage({ item, onBack, debugMode, categoryName }) {
 
     const handleRecommendedItemClick = (recommendedItem) => {
         setCurrentItem(recommendedItem);
+        fetchRecommendations();
     };
 
     return (
@@ -43,7 +44,7 @@ function ItemDetailPage({ item, onBack, debugMode, categoryName }) {
             <Button onClick={onBack} variant="text" color="primary" sx={{ mb: 2 }} startIcon={<ArrowBackIcon />}>
                 Kembali
             </Button>
-            <Card variant="outlined" sx={{ mb: 4 }}>
+            <Card variant="outlined" sx={{ mb: 4 }} >
                 <CardMedia
                     component="img"
                     height="300"
@@ -66,13 +67,13 @@ function ItemDetailPage({ item, onBack, debugMode, categoryName }) {
                 </CardContent>
             </Card>
 
-            <Typography variant="h6" gutterBottom>
-                Recommended Items:
+            <Typography variant="h5" gutterBottom>
+                Rekomendasi
             </Typography>
             <Grid container spacing={3}>
                 {recommendedItems.map((recommendedItem, index) => (
                     <Grid item xs={12} sm={6} key={recommendedItem.id}>
-                        <Card variant='outlined' onClick={() => handleRecommendedItemClick(recommendedItem)}>
+                        <Card variant='outlined' onClick={() => handleRecommendedItemClick(recommendedItem)} onMouseEnter={e => e.currentTarget.style.transform = 'scale(1.05)'} onMouseLeave={e => e.currentTarget.style.transform = 'scale(1)'} style={{transition: 'all 0.2s ease-in-out'}}>
                             <CardMedia
                                 component="img"
                                 height="140"
