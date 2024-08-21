@@ -21,9 +21,9 @@ stopwords_file = 'stopwords_id.txt'
 stopwords = load_stopwords(stopwords_file)
 
 def load_data():
-    conn = sqlite3.connect('lovresso_menu.db')
-    df = pd.read_sql_query("SELECT * FROM menu_items", conn)
-    df['features'] = df['description'] + ' ' + df['tags']
+    conn = sqlite3.connect('lovresso_db.db')
+    df = pd.read_sql_query("SELECT * FROM item", conn)
+    df['item_features'] = df['description'] + ' ' + df['tags']
     conn.close()
     return df
 

@@ -3,15 +3,14 @@ from werkzeug.security import generate_password_hash
 
 def create_user_table():
     # Connect to the database (will create it if it doesn't exist)
-    conn = sqlite3.connect('lovresso_menu.db')
+    conn = sqlite3.connect('lovresso_db.db')
     cursor = conn.cursor()
 
     # Create the User table
     cursor.execute('''
-    CREATE TABLE IF NOT EXISTS User (
-        id INTEGER PRIMARY KEY AUTOINCREMENT,
-        username TEXT NOT NULL UNIQUE,
-        password TEXT NOT NULL
+    CREATE TABLE IF NOT EXISTS user (
+        user_name TEXT NOT NULL UNIQUE,
+        user_password TEXT NOT NULL
     )
     ''')
 
@@ -24,7 +23,7 @@ def create_user_table():
 
     # Insert the user into the table if not already exists
     cursor.execute('''
-    INSERT OR IGNORE INTO User (username, password)
+    INSERT OR IGNORE INTO user (user_name, user_password)
     VALUES (?, ?)
     ''', (username, hashed_password))
 
