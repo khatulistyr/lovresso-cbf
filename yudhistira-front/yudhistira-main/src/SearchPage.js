@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Container, TextField, Typography, Card, CardContent, CardMedia, Grid, Stack, IconButton, InputAdornment } from '@mui/material';
 import ItemDetailPage from './ItemDetailPage';
@@ -9,9 +9,23 @@ import { TextLoop } from 'easy-react-text-loop';
 function SearchPage() {
     const [searchQuery, setSearchQuery] = useState('');
     const [searchResults, setSearchResults] = useState([]);
+    const [items, setItems] = useState([]);
     const [showSearchResults, setShowSearchResults] = useState(false);
+    const [categories, setCategories] = useState([]); // Added state for categories
     const [selectedItem, setSelectedItem] = useState(null);
     const [debugMode, setDebugMode] = useState(true);
+
+    useEffect(() => {
+        // Fetch items and categories only once when the component mounts
+        axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/items`)
+            .then(response => setItems(response.data))
+            .catch(error => console.error('Error fetching items:', error));
+            
+        axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/categories`)
+            .then(response => setCategories(response.data))
+            .catch(error => console.error('Error fetching categories:', error));
+    }, []); // The empty array means this effect runs only once
+    
 
     const handleSearch = async () => {
         try {
@@ -33,7 +47,12 @@ function SearchPage() {
 
     const handleItemSelect = (item) => {
         setSelectedItem(item);
-        setSearchQuery(item.name); // Set searchQuery to the selected item's name
+        // setSearchQuery(item.name); // Set searchQuery to the selected item's name
+    };
+
+    const getCategoryName = (categoryId) => {
+        const category = categories.find(category => category.category_id === categoryId);
+        return category ? `${category.category_name}` : `Unknown (ID: ${categoryId})`;
     };
 
     const handleKeyPress = (event) => {
@@ -97,7 +116,7 @@ function SearchPage() {
                         InputProps={{
                             endAdornment: (
                                 <InputAdornment position="end">
-                                    {searchQuery && (
+                                    {(
                                         <IconButton onClick={handleClearSearch}>
                                             <ClearIcon />
                                         </IconButton>
@@ -136,7 +155,7 @@ function SearchPage() {
                                 InputProps={{
                                     endAdornment: (
                                         <InputAdornment position="end">
-                                            {searchQuery && (
+                                            {(
                                                 <IconButton onClick={handleClearSearch}>
                                                     <ClearIcon />
                                                 </IconButton>
@@ -152,7 +171,7 @@ function SearchPage() {
 
                         <CardContent style={{ overflowY: 'auto' }}>
                             {selectedItem ? (
-                                <ItemDetailPage item={selectedItem} onBack={() => setSelectedItem(null)} debugMode={debugMode} />
+                                <ItemDetailPage item={selectedItem} onBack={() => setSelectedItem(null)} debugMode={debugMode} categoryName={getCategoryName(selectedItem.category_id)}/>
                             ) : (
                                 <div>
                                     {searchResults.length === 0 ? (
@@ -168,14 +187,14 @@ function SearchPage() {
                                                             <CardMedia
                                                                 component="img"
                                                                 height="140"
-                                                                image={item.image_url}
+                                                                image={`${process.env.REACT_APP_API_BASE_URL}${item.image_url}`}
                                                                 alt={item.name}
                                                             />
                                                             <CardContent>
                                                                 <Typography variant="h5">{item.item_name}</Typography>
                                                                 <Typography variant="h6">Rp. {item.item_price}</Typography>
                                                                 <Typography variant="body2"><strong>Description:</strong> {item.item_description}</Typography>
-                                                                <Typography variant="body2"><strong>Category:</strong> {item.category_id}</Typography>
+                                                                <Typography variant="body2"><strong>Category:</strong> {getCategoryName(item.category_id)}</Typography>
                                                                 {debugMode && (
                                                                     <>
                                                                         <Typography variant="body2"><strong>Tags:</strong> {item.item_tags}</Typography>

@@ -9,6 +9,7 @@ const ItemDialog = ({ open, item, onClose, onSave, categories }) => {
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState('');
   const [image, setImage] = useState(null); // State to handle image file
+  // const [categories, setCategories] = useState([]); // Added state for categories
   const [imageUrl, setImageUrl] = useState('');
 
   useEffect(() => {
@@ -30,6 +31,11 @@ const ItemDialog = ({ open, item, onClose, onSave, categories }) => {
     }
   }, [item, open]);
 
+  const getCategoryName = (categoryId) => {
+    const category = categories.find(category => category.category_id === categoryId);
+    return category ? `${category.category_name}` : `Unknown (ID: ${categoryId})`;
+  };
+
   const handleImageChange = async (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -47,15 +53,16 @@ const ItemDialog = ({ open, item, onClose, onSave, categories }) => {
 
   const handleSave = () => {
     const newItem = {
-      item_name: name,
-      category_id: categoryId,
-      item_price: parseFloat(price),
-      item_description: description,
-      item_tags: tags,
-      image_url: imageUrl,
+        item_id: item?.item_id,  // Include item_id if it exists
+        item_name: name,
+        category_id: categoryId,
+        item_price: parseFloat(price),
+        item_description: description,
+        item_tags: tags,
+        image_url: imageUrl,
     };
-    onSave(item ? { ...item, ...newItem } : newItem);
-  };
+    onSave(newItem);
+};
 
   return (
     <Dialog open={open} onClose={onClose}>

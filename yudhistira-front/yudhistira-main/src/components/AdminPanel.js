@@ -81,14 +81,14 @@ const AdminPanel = () => {
 
     const handleDeleteClick = (id) => {
         axios.delete(`${process.env.REACT_APP_API_BASE_URL}/api/items/${id}`).then(() => {
-            setItems(items.filter(item => item.id !== id));
+            setItems(items.filter(item => item.item_id !== id));
         });
     };
 
     const handleSave = (item) => {
-        if (item.id) {
-            axios.put(`${process.env.REACT_APP_API_BASE_URL}/api/items/${item.id}`, item).then(() => {
-                setItems(items.map(i => (i.id === item.id ? item : i)));
+        if (item.item_id) {  // Check for item_id instead of id
+            axios.put(`${process.env.REACT_APP_API_BASE_URL}/api/items/${item.item_id}`, item).then(() => {
+                setItems(items.map(i => (i.item_id === item.item_id ? item : i)));  // Use item_id for comparison
                 setOpenDialog(false);
             });
         } else {
@@ -97,7 +97,7 @@ const AdminPanel = () => {
                 setOpenDialog(false);
             });
         }
-    };
+    };      
 
     const handleSearchChange = (event) => {
         setSearch(event.target.value);
@@ -188,7 +188,7 @@ const AdminPanel = () => {
                                     <TableRow key={item.id}>
                                         <TableCell>{item.item_id}</TableCell>
                                         <TableCell>{item.item_name}</TableCell>
-                                        <TableCell>{getCategoryName(item.category_id)}</TableCell> {/* Display category name */}
+                                        <TableCell>{getCategoryName(item.category_id)}</TableCell>
                                         <TableCell>{item.item_description}</TableCell>
                                         <TableCell>{item.item_tags}</TableCell>
                                         <TableCell>{item.item_price}</TableCell>
@@ -196,7 +196,7 @@ const AdminPanel = () => {
                                             {item.image_url ? (
                                                 <img src={`${process.env.REACT_APP_API_BASE_URL}${item.image_url}`} alt={item.item_name} style={{ width: 50, height: 50 }} />
                                             ) : (
-                                                '-'
+                                                'None'
                                             )}
                                         </TableCell>
                                         <TableCell>

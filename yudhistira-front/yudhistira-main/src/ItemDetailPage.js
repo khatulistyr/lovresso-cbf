@@ -3,8 +3,9 @@ import axios from 'axios';
 import { Button, Typography, Card, CardContent, CardMedia, Grid, Box } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
 
-function ItemDetailPage({ item, onBack, debugMode }) {
+function ItemDetailPage({ item, onBack, debugMode, categoryName }) {
     const [recommendedItems, setRecommendedItems] = useState([]);
+    const [categories, setCategories] = useState([]); // Added state for categories
     const [currentItem, setCurrentItem] = useState(item);
 
     useEffect(() => {
@@ -27,6 +28,12 @@ function ItemDetailPage({ item, onBack, debugMode }) {
         fetchRecommendations();
     }, [currentItem.name]);
 
+    // not fetching from searchpage 'cause it broke man idk
+    const getCategoryName = (categoryId) => {
+        const category = categories.find(category => category.category_id === categoryId);
+        return category ? `${category.category_name}` : `Unknown (ID: ${categoryId})`;
+    };
+
     const handleRecommendedItemClick = (recommendedItem) => {
         setCurrentItem(recommendedItem);
     };
@@ -40,19 +47,19 @@ function ItemDetailPage({ item, onBack, debugMode }) {
                 <CardMedia
                     component="img"
                     height="300"
-                    image={currentItem.image_url} // Main image
+                    image={`${process.env.REACT_APP_API_BASE_URL}${currentItem.image_url}`} // Main image
                     alt={currentItem.name}
                 />
                 <CardContent>
                     <Typography variant="h5" gutterBottom>
                         {currentItem.name}
                     </Typography>
-                    <Typography variant="body2"><strong>Category:</strong> {currentItem.category}</Typography>
-                    <Typography variant="body2"><strong>Description:</strong> {currentItem.description}</Typography>
+                    <Typography variant="body2"><strong>Category:</strong> {categoryName}</Typography>
+                    <Typography variant="body2"><strong>Description:</strong> {currentItem.item_description}</Typography>
                     {/* Conditionally render Tags and Similarity Score based on Debug Mode */}
                     {debugMode && (
                         <>
-                            <Typography variant="body2"><strong>Tags:</strong> {currentItem.tags}</Typography>
+                            <Typography variant="body2"><strong>Tags:</strong> {currentItem.item_tags}</Typography>
                             <Typography variant="body2"><strong>Similarity Score:</strong> {currentItem.score !== undefined ? currentItem.score.toFixed(4) : 'N/A'}</Typography>
                         </>
                     )}
@@ -69,7 +76,7 @@ function ItemDetailPage({ item, onBack, debugMode }) {
                             <CardMedia
                                 component="img"
                                 height="140"
-                                image={recommendedItem.image_url} // Thumbnail image for recommended item
+                                image={`${process.env.REACT_APP_API_BASE_URL}${recommendedItem.image_url}`} // Thumbnail image for recommended item
                                 alt={recommendedItem.item_name}
                             />
                             <CardContent>

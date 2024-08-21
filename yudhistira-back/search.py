@@ -10,8 +10,9 @@ def load_data():
     conn.close()
     return df
 
-def search_items(query, df, top_n=4):
+def search_items(query, df, top_n=10):
     df['item_features'] = df['item_name'] + ' ' + df['item_description'] + ' ' + df['item_tags'].fillna('')
+    # df['item_features'] = df['item_features'].lower()
     vectorizer = TfidfVectorizer()
     tfidf_matrix = vectorizer.fit_transform(df['item_features'])
     

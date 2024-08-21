@@ -115,18 +115,21 @@ def get_categories():
     return jsonify(categories)
 
 @app.route('/api/items/<int:item_id>', methods=['PUT'])
-@cross_origin()
 def update_item(item_id):
-    data = request.json
     conn = sqlite3.connect('lovresso_db.db')
     cursor = conn.cursor()
-    cursor.execute(
-        "UPDATE item SET item_name=?, category_id=?, item_price=?, item_description=?, item_tags=?, image_url=? WHERE item_id=?",
-        (data['item_name'], data['category_id'], data['item_price'], data['item_description'], data['item_tags'], data.get('image_url', ''), item_id)
-    )
+
+    data = request.json
+    cursor.execute('''
+        UPDATE item
+        SET item_name = ?, category_id = ?, item_description = ?, item_tags = ?, item_price = ?, image_url = ?
+        WHERE item_id = ?
+    ''', (data['item_name'], data['category_id'], data['item_description'], data['item_tags'], data['item_price'], data['image_url'], item_id))
+
     conn.commit()
     conn.close()
-    return jsonify({'item_id': item_id, **data})
+    
+    return jsonify({'message': 'Item updated successfully'})
 
 @app.route('/api/items/<int:item_id>', methods=['DELETE'])
 # @cross_origin(origin='*')
