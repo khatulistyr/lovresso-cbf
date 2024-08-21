@@ -11,7 +11,7 @@ function ItemDetailPage({ item, onBack, debugMode }) {
         const fetchRecommendations = async () => {
             try {
                 const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/recommend`, {
-                    item_name: currentItem.name
+                    item_name: currentItem.item_name
                 }, {
                     headers: {
                         'Content-Type': 'application/json'
@@ -70,17 +70,17 @@ function ItemDetailPage({ item, onBack, debugMode }) {
                                 component="img"
                                 height="140"
                                 image={recommendedItem.image_url} // Thumbnail image for recommended item
-                                alt={recommendedItem.name}
+                                alt={recommendedItem.item_name}
                             />
                             <CardContent>
-                                <Typography variant="h6">{recommendedItem.name}</Typography>
-                                <Typography variant="body2"><strong>Category:</strong> {recommendedItem.category}</Typography>
-                                <Typography variant="body2"><strong>Description:</strong> {recommendedItem.description}</Typography>
-                                <Typography variant="body2"><strong>Price:</strong> {recommendedItem.price}</Typography>
+                                <Typography variant="h6">{recommendedItem.item_name}</Typography>
+                                <Typography variant="body2"><strong>Category:</strong> {recommendedItem.category_id}</Typography>
+                                <Typography variant="body2"><strong>Description:</strong> {recommendedItem.item_description}</Typography>
+                                <Typography variant="body2"><strong>Price:</strong> {recommendedItem.item_price}</Typography>
                                 {/* Conditionally render Tags and Similarity Score based on Debug Mode */}
                                 {debugMode && (
                                     <>
-                                        <Typography variant="body2"><strong>Tags:</strong> {recommendedItem.tags}</Typography>
+                                        <Typography variant="body2"><strong>Tags:</strong> {recommendedItem.item_tags}</Typography>
                                         <Typography variant="body2"><strong>Similarity Score:</strong> {recommendedItem.score !== undefined ? recommendedItem.score.toFixed(4) : 'N/A'}</Typography>
                                     </>
                                 )}

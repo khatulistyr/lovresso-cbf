@@ -71,11 +71,11 @@ const AdminPanel = () => {
 
     const getCategoryName = (categoryId) => {
         const category = categories.find(cat => cat.id === categoryId);
-        return category ? category.name : 'Unknown';
+        return category ? category.category_name : `Unknown (ID: ${categoryId})`;
     };
 
     const filteredItems = items.filter(item => 
-        item.name && item.name.toLowerCase().includes(search.toLowerCase())
+        item.item_name && item.item_name.toLowerCase().includes(search.toLowerCase())
     );
     
     return (
@@ -124,20 +124,20 @@ const AdminPanel = () => {
                             <TableBody>
                                 {filteredItems.map((item) => (
                                     <TableRow key={item.id}>
-                                        <TableCell>{item.id}</TableCell>
-                                        <TableCell>{item.name}</TableCell>
+                                        <TableCell>{item.item_id}</TableCell>
+                                        <TableCell>{item.item_name}</TableCell>
                                         <TableCell>{getCategoryName(item.category_id)}</TableCell> {/* Display category name */}
-                                        <TableCell>{item.description}</TableCell>
-                                        <TableCell>{item.tags}</TableCell>
-                                        <TableCell>{item.price}</TableCell>
-                                        <TableCell>
+                                        <TableCell>{item.item_description}</TableCell>
+                                        <TableCell>{item.item_tags}</TableCell>
+                                        <TableCell>{item.item_price}</TableCell>
+                                        {/* <TableCell>
                                             {item.image_url && <img src={item.image_url} alt={item.name} style={{ width: 50, height: 50 }} />}
-                                        </TableCell>
+                                        </TableCell> */}
                                         <TableCell>
                                             <IconButton onClick={() => handleEditClick(item)}>
                                                 <EditIcon />
                                             </IconButton>
-                                            <IconButton onClick={() => handleDeleteClick(item.id)}>
+                                            <IconButton onClick={() => handleDeleteClick(item.item_id)}>
                                                 <DeleteIcon />
                                             </IconButton>
                                         </TableCell>

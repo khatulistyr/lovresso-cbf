@@ -11,7 +11,7 @@ function SearchPage() {
     const [searchResults, setSearchResults] = useState([]);
     const [showSearchResults, setShowSearchResults] = useState(false);
     const [selectedItem, setSelectedItem] = useState(null);
-    const [debugMode, setDebugMode] = useState(false);
+    const [debugMode, setDebugMode] = useState(true);
 
     const handleSearch = async () => {
         try {
@@ -84,7 +84,6 @@ function SearchPage() {
                 
                 {/* Conditionally render the search bar outside the card when showSearchResults is false */}
                 {!showSearchResults && (
-                    // <Stack direction="row" spacing={2} alignItems="center" m={2} style={{ backgroundColor: 'white', zIndex: 1 }}>
                     <TextField
                         variant="outlined"
                         fullWidth
@@ -110,12 +109,10 @@ function SearchPage() {
                             ),
                         }}
                     />
-                    // </Stack>
                 )}
                 
                 {showSearchResults && (
                     <Card
-                        // Main Card
                         variant='outlined'
                         style={{
                             padding: '0 10px 0 10px',
@@ -153,7 +150,6 @@ function SearchPage() {
                             />
                         </Stack>
 
-                    {showSearchResults && (
                         <CardContent style={{ overflowY: 'auto' }}>
                             {selectedItem ? (
                                 <ItemDetailPage item={selectedItem} onBack={() => setSelectedItem(null)} debugMode={debugMode} />
@@ -166,23 +162,23 @@ function SearchPage() {
                                     ) : (
                                         <div>
                                             <Grid container spacing={3}>
-                                                {searchResults.map((item, index) => (
-                                                    <Grid item xs={12} sm={6} key={index}>
+                                                {searchResults.map((item) => (
+                                                    <Grid item xs={12} sm={6} key={item.id}>
                                                         <Card onClick={() => handleItemSelect(item)} variant="outlined">
                                                             <CardMedia
                                                                 component="img"
                                                                 height="140"
                                                                 image={item.image_url}
                                                                 alt={item.name}
-                                                                />
+                                                            />
                                                             <CardContent>
-                                                                <Typography variant="h5">{item.name}</Typography>
-                                                                <Typography variant="h6">Rp. {item.price}</Typography>
-                                                                <Typography variant="body2"><strong>Description:</strong> {item.description}</Typography>
-                                                                <Typography variant="body2"><strong>Category:</strong> {item.category}</Typography>
+                                                                <Typography variant="h5">{item.item_name}</Typography>
+                                                                <Typography variant="h6">Rp. {item.item_price}</Typography>
+                                                                <Typography variant="body2"><strong>Description:</strong> {item.item_description}</Typography>
+                                                                <Typography variant="body2"><strong>Category:</strong> {item.category_id}</Typography>
                                                                 {debugMode && (
                                                                     <>
-                                                                        <Typography variant="body2"><strong>Tags:</strong> {item.tags}</Typography>
+                                                                        <Typography variant="body2"><strong>Tags:</strong> {item.item_tags}</Typography>
                                                                         <Typography variant="body2"><strong>Similarity Score:</strong> {item.score !== undefined ? item.score.toFixed(4) : 'N/A'}</Typography>
                                                                     </>
                                                                 )}
@@ -196,8 +192,7 @@ function SearchPage() {
                                 </div>
                             )}
                         </CardContent>
-                    )}
-                </Card>
+                    </Card>
                 )}
             </Container>
         </Container>
