@@ -70,7 +70,7 @@ const AdminPanel = () => {
     };
 
     const getCategoryName = (categoryId) => {
-        const category = categories.find(cat => cat.id === categoryId);
+        const category = categories.find(category => category.category_id === categoryId);
         return category ? category.category_name : `Unknown (ID: ${categoryId})`;
     };
 
@@ -130,9 +130,13 @@ const AdminPanel = () => {
                                         <TableCell>{item.item_description}</TableCell>
                                         <TableCell>{item.item_tags}</TableCell>
                                         <TableCell>{item.item_price}</TableCell>
-                                        {/* <TableCell>
-                                            {item.image_url && <img src={item.image_url} alt={item.name} style={{ width: 50, height: 50 }} />}
-                                        </TableCell> */}
+                                        <TableCell>
+                                        {item.image_url ? (
+                                            <img src={`${process.env.REACT_APP_API_BASE_URL}${item.image_url}`} alt={item.item_name} style={{ width: 50, height: 50 }} />
+                                        ) : (
+                                            '-'
+                                        )}
+                                        </TableCell>
                                         <TableCell>
                                             <IconButton onClick={() => handleEditClick(item)}>
                                                 <EditIcon />

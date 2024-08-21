@@ -42,15 +42,14 @@ def search():
     return jsonify(search_results)
 
 @app.route('/api/items', methods=['POST'])
-# @cross_origin(origin='*')
 @cross_origin()
 def add_item():
     data = request.json
     conn = sqlite3.connect('lovresso_db.db')
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO item (name, category_id, item_price, item_description, item_tags, image_url) VALUES (?, ?, ?, ?, ?, ?)",
-        (data['item_name'], data['category_id'], data['item_price'], data['item_description'], data['item_tags'], data.get('imageUrl', ''))
+        "INSERT INTO item (item_name, category_id, item_price, item_description, item_tags, image_url) VALUES (?, ?, ?, ?, ?, ?)",
+        (data['item_name'], data['category_id'], data['item_price'], data['item_description'], data['item_tags'], data.get('image_url', ''))
     )
     conn.commit()
     item_id = cursor.lastrowid
@@ -67,7 +66,6 @@ def get_categories():
     return jsonify(categories)
 
 @app.route('/api/items/<int:item_id>', methods=['PUT'])
-# @cross_origin(origin='*')
 @cross_origin()
 def update_item(item_id):
     data = request.json
@@ -75,7 +73,7 @@ def update_item(item_id):
     cursor = conn.cursor()
     cursor.execute(
         "UPDATE item SET item_name=?, category_id=?, item_price=?, item_description=?, item_tags=?, image_url=? WHERE item_id=?",
-        (data['item_name'], data['category_id'], data['item_price'], data['item_description'], data['item_tags'], data.get('imageUrl', ''), item_id)
+        (data['item_name'], data['category_id'], data['item_price'], data['item_description'], data['item_tags'], data.get('image_url', ''), item_id)
     )
     conn.commit()
     conn.close()
@@ -103,7 +101,6 @@ def get_items():
     return jsonify(items)
 
 @app.route('/api/upload', methods=['POST'])
-# @cross_origin(origin='*')
 @cross_origin()
 def upload_file():
     if 'file' not in request.files:
@@ -117,10 +114,10 @@ def upload_file():
     return jsonify({'file_url': f'/uploads/{filename}'})
 
 @app.route('/uploads/<filename>')
-# @cross_origin(origin='*')
 @cross_origin()
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000, debug=True)
