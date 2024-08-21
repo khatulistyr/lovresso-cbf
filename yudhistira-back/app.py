@@ -14,7 +14,7 @@ app = Flask(__name__)
 CORS(app)
 
 app.config['SECRET_KEY'] = secrets.token_hex(24)
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lovresso_menu.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lovresso_db.db'
 
 db.init_app(app)
 login_manager.init_app(app)
@@ -46,39 +46,48 @@ def search():
 @cross_origin()
 def add_item():
     data = request.json
-    conn = sqlite3.connect('lovresso_menu.db')
+    conn = sqlite3.connect('lovresso_db.db')
     cursor = conn.cursor()
     cursor.execute(
-        "INSERT INTO menu_items (name, category, price, description, tags, image_url) VALUES (?, ?, ?, ?, ?)",
-        (data['name'], data['category'], data['price'], data['description'], data['tags'], data.get('imageUrl', ''))
+        "INSERT INTO item (name, category_id, item_price, item_description, item_tags, image_url) VALUES (?, ?, ?, ?, ?, ?)",
+        (data['item_name'], data['category_id'], data['item_price'], data['item_description'], data['item_tags'], data.get('imageUrl', ''))
     )
     conn.commit()
     item_id = cursor.lastrowid
     conn.close()
-    return jsonify({'id': item_id, **data})
+    return jsonify({'item_id': item_id, **data})
+
+@app.route('/api/categories', methods=['GET'])
+@cross_origin()
+def get_categories():
+    conn = sqlite3.connect('lovresso_db.db')
+    df = pd.read_sql_query("SELECT * FROM category", conn)
+    conn.close()
+    categories = df.to_dict(orient='records')
+    return jsonify(categories)
 
 @app.route('/api/items/<int:item_id>', methods=['PUT'])
 # @cross_origin(origin='*')
 @cross_origin()
 def update_item(item_id):
     data = request.json
-    conn = sqlite3.connect('lovresso_menu.db')
+    conn = sqlite3.connect('lovresso_db.db')
     cursor = conn.cursor()
     cursor.execute(
-        "UPDATE menu_items SET name=?, category=?, price=?, description=?, tags=?, image_url=? WHERE id=?",
-        (data['name'], data['category'], data['price'], data['description'], data['tags'], data.get('imageUrl', ''), item_id)
+        "UPDATE item SET item_name=?, category_id=?, item_price=?, item_description=?, item_tags=?, image_url=? WHERE item_id=?",
+        (data['item_name'], data['category_id'], data['item_price'], data['item_description'], data['item_tags'], data.get('imageUrl', ''), item_id)
     )
     conn.commit()
     conn.close()
-    return jsonify({'id': item_id, **data})
+    return jsonify({'item_id': item_id, **data})
 
 @app.route('/api/items/<int:item_id>', methods=['DELETE'])
 # @cross_origin(origin='*')
 @cross_origin()
 def delete_item(item_id):
-    conn = sqlite3.connect('lovresso_menu.db')
+    conn = sqlite3.connect('lovresso_db.db')
     cursor = conn.cursor()
-    cursor.execute("DELETE FROM menu_items WHERE id=?", (item_id,))
+    cursor.execute("DELETE FROM item WHERE item_id=?", (item_id,))
     conn.commit()
     conn.close()
     return jsonify({'message': 'Item deleted'})
@@ -87,8 +96,8 @@ def delete_item(item_id):
 # @cross_origin(origin='*')
 @cross_origin()
 def get_items():
-    conn = sqlite3.connect('lovresso_menu.db')
-    df = pd.read_sql_query("SELECT * FROM menu_items", conn)
+    conn = sqlite3.connect('lovresso_db.db')
+    df = pd.read_sql_query("SELECT * FROM item", conn)
     conn.close()
     items = df.to_dict(orient='records')
     return jsonify(items)

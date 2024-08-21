@@ -34,14 +34,14 @@ def preprocess_text(text):
     return ' '.join(tokens)
 
 def load_data():
-    conn = sqlite3.connect('lovresso_menu.db')
-    df = pd.read_sql_query("SELECT * FROM menu_items", conn)
-    df['features'] = df['description'] + ' ' + df['tags']
+    conn = sqlite3.connect('lovresso_db.db')
+    df = pd.read_sql_query("SELECT * FROM item", conn)
+    df['item_features'] = df['item_description'] + ' ' + df['item_tags']
     conn.close()
     return df
 
 def calculate_tfidf(df):
-    df['combined'] = df['description'] + ' ' + df['tags'].fillna('')
+    df['combined'] = df['item_description'] + ' ' + df['item_tags'].fillna('')
     df['combined'] = df['combined'].apply(preprocess_text)
     
     vectorizer = TfidfVectorizer()
@@ -51,13 +51,13 @@ def calculate_tfidf(df):
     return tfidf_matrix, feature_names
 
 def recommend_items(item_name, df, top_n=4):
-    df['combined'] = df['description'] + ' ' + df['tags'].fillna('')
+    df['combined'] = df['item_description'] + ' ' + df['item_tags'].fillna('')
     df['combined'] = df['combined'].apply(preprocess_text)
     vectorizer = TfidfVectorizer()
     tfidf_matrix = vectorizer.fit_transform(df['combined'])
 
     try:
-        item_idx = df[df['name'] == item_name].index[0]
+        item_idx = df[df['item_name'] == item_name].index[0]
     except IndexError:
         return []
 
@@ -69,10 +69,10 @@ def recommend_items(item_name, df, top_n=4):
     recommended_df = df[(df['score'] > 0) & (df.index != item_idx)].sort_values(by='score', ascending=False)
 
     if len(recommended_df) < top_n:
-        same_category_df = df[(df['category'] == df.loc[item_idx, 'category']) & (df.index != item_idx)].copy()
+        same_category_df = df[(df['category_id'] == df.loc[item_idx, 'category_id']) & (df.index != item_idx)].copy()
         same_category_df['score'] = 0
         same_category_df['score_type'] = 'similar category'
-        recommended_df = pd.concat([recommended_df, same_category_df]).drop_duplicates(subset=['name']).head(top_n)
+        recommended_df = pd.concat([recommended_df, same_category_df]).drop_duplicates(subset=['item_name']).head(top_n)
 
     return recommended_df.head(top_n).to_dict(orient='records')
 
@@ -87,7 +87,7 @@ def display_results(item_name, df, export_to_excel=False):
     table = []
 
     for item in results:
-        row = [item['name'], item['score']]
+        row = [item['item_name'], item['score']]
         table.append(row)
 
     if export_to_excel:

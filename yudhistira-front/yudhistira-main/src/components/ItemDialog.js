@@ -1,59 +1,42 @@
-// src/components/ItemDialog.js
 import React, { useState, useEffect } from 'react';
-import { Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle, IconButton, InputLabel, MenuItem, Select } from '@mui/material';
-import PhotoCamera from '@mui/icons-material/PhotoCamera';
-import axios from 'axios';
+import { Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle, MenuItem, Select, InputLabel } from '@mui/material';
 
-const ItemDialog = ({ open, item, onClose, onSave }) => {
+const ItemDialog = ({ open, item, onClose, onSave, categories }) => {
   const [name, setName] = useState('');
-  const [category, setCategory] = useState('');
+  const [categoryId, setCategoryId] = useState('');
   const [price, setPrice] = useState('');
   const [description, setDescription] = useState('');
   const [tags, setTags] = useState('');
-  const [imageSource, setImageSource] = useState('url');
   const [imageUrl, setImageUrl] = useState('');
-  const [imageFile, setImageFile] = useState(null);
 
   useEffect(() => {
     if (item) {
       setName(item.name || '');
-      setCategory(item.category || '');
+      setCategoryId(item.category_id || '');
       setPrice(item.price || '');
       setDescription(item.description || '');
       setTags(item.tags || '');
-      // setImageSource(item.imageSource ? 'upload' : 'url'); // Set imageSource based on whether imageUrl is provided
-      setImageUrl(item.imageUrl || '');
-      setImageFile(null);
+      setImageUrl(item.image_url || '');
     } else {
-      // Reset state for new item
       setName('');
-      setCategory('');
+      setCategoryId('');
       setPrice('');
       setDescription('');
       setTags('');
-      setImageSource('url');
       setImageUrl('');
-      setImageFile(null);
     }
   }, [item, open]);
 
   const handleSave = () => {
     const newItem = {
       name,
-      category,
+      category_id: categoryId,
       price: parseFloat(price),
       description,
       tags,
-      imageUrl: imageSource === 'url' ? imageUrl : '',
-      imageFile: imageSource === 'upload' ? imageFile : null,
+      image_url: imageUrl,
     };
     onSave(item ? { ...item, ...newItem } : newItem);
-  };
-
-  const handleImageUpload = (event) => {
-    const file = event.target.files[0];
-    setImageFile(file);
-    setImageUrl(''); // Clear URL when uploading file
   };
 
   return (
@@ -69,14 +52,20 @@ const ItemDialog = ({ open, item, onClose, onSave }) => {
           value={name}
           onChange={(e) => setName(e.target.value)}
         />
-        <TextField
-          margin="dense"
-          label="Category"
+        <InputLabel id="category-label">Category</InputLabel>
+        <Select
+          labelId="category-label"
+          value={categoryId}
+          onChange={(e) => setCategoryId(e.target.value)}
           fullWidth
-          variant="outlined"
-          value={category}
-          onChange={(e) => setCategory(e.target.value)}
-        />
+          margin="dense"
+        >
+          {categories.map(category => (
+            <MenuItem key={category.id} value={category.id}>
+              {category.name}
+            </MenuItem>
+          ))}
+        </Select>
         <TextField
           margin="dense"
           label="Price"
@@ -106,48 +95,13 @@ const ItemDialog = ({ open, item, onClose, onSave }) => {
           onChange={(e) => setTags(e.target.value)}
         />
         <TextField
-            margin="dense"
-            label="Image URL"
-            fullWidth
-            variant="outlined"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-          />
-        {/* <InputLabel>Image Source</InputLabel>
-        <Select
-          value={imageSource}
-          onChange={(e) => setImageSource(e.target.value)}
-          fullWidth
           margin="dense"
-        >
-          <MenuItem value="url">URL</MenuItem>
-          <MenuItem value="upload">Upload</MenuItem>
-        </Select>
-        {imageSource === 'url' && (
-          <TextField
-            margin="dense"
-            label="Image URL"
-            fullWidth
-            variant="outlined"
-            value={imageUrl}
-            onChange={(e) => setImageUrl(e.target.value)}
-          />
-        )}
-        {imageSource === 'upload' && (
-          <Button
-            variant="contained"
-            component="label"
-            startIcon={<PhotoCamera />}
-          >
-            Upload Image
-            <input
-              type="file"
-              hidden
-              accept="image/*"
-              onChange={handleImageUpload}
-            />
-          </Button>
-        )} */}
+          label="Image URL"
+          fullWidth
+          variant="outlined"
+          value={imageUrl}
+          onChange={(e) => setImageUrl(e.target.value)}
+        />
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose} color="primary">

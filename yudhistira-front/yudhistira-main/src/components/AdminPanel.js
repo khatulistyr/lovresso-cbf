@@ -13,60 +13,27 @@ import { useNavigate } from 'react-router-dom';
 
 const AdminPanel = () => {
     const [items, setItems] = useState([]);
+    const [categories, setCategories] = useState([]); // Added state for categories
     const [search, setSearch] = useState('');
     const [openDialog, setOpenDialog] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
-    const [loginDialogOpen, setLoginDialogOpen] = useState(false);
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
-    const [success, setSuccess] = useState('');
     const [isAuthenticated, setIsAuthenticated] = useState(false);
     const navigate = useNavigate();
 
     useEffect(() => {
-      const token = localStorage.getItem('authToken');
-      if (token) {
-          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          setIsAuthenticated(true);
-          // Optionally, you can fetch items here if not done elsewhere
-      }
+        const token = localStorage.getItem('authToken');
+        if (token) {
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            setIsAuthenticated(true);
+        }
     }, []);
 
     useEffect(() => {
         if (isAuthenticated) {
             axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/items`).then(response => setItems(response.data));
+            axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/categories`).then(response => setCategories(response.data)); // Fetch categories
         }
     }, [isAuthenticated]);
-
-    const handleLogin = async () => {
-      try {
-          const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/auth/login`, { username, password });
-          const token = response.data.token;
-          localStorage.setItem('authToken', token);
-          axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-          setSuccess('Login successful');
-          setError('lohkok eror');
-          setIsAuthenticated(true);
-          setLoginDialogOpen(false);
-      } catch (err) {
-          setError('Invalid credentials');
-          setSuccess('');
-      }
-  };
-  
-  const handleLogout = async () => {
-      try {
-          await axios.post(`${process.env.REACT_APP_API_BASE_URL}/auth/logout`);
-          localStorage.removeItem('authToken');
-          delete axios.defaults.headers.common['Authorization'];
-          setIsAuthenticated(false);
-          // navigate('/login');
-      } catch (err) {
-          console.error('Logout failed', err);
-      }
-  };
-  
 
     const handleAddClick = () => {
         setCurrentItem(null);
@@ -86,13 +53,11 @@ const AdminPanel = () => {
 
     const handleSave = (item) => {
         if (item.id) {
-            // Update existing item
             axios.put(`${process.env.REACT_APP_API_BASE_URL}/api/items/${item.id}`, item).then(() => {
                 setItems(items.map(i => (i.id === item.id ? item : i)));
                 setOpenDialog(false);
             });
         } else {
-            // Add new item
             axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/items`, item).then(response => {
                 setItems([...items, response.data]);
                 setOpenDialog(false);
@@ -104,50 +69,24 @@ const AdminPanel = () => {
         setSearch(event.target.value);
     };
 
-    const filteredItems = items.filter(item =>
-        item.name.toLowerCase().includes(search.toLowerCase())
-    );
+    const getCategoryName = (categoryId) => {
+        const category = categories.find(cat => cat.id === categoryId);
+        return category ? category.name : 'Unknown';
+    };
 
+    const filteredItems = items.filter(item => 
+        item.name && item.name.toLowerCase().includes(search.toLowerCase())
+    );
+    
     return (
         <Container>
-            {!isAuthenticated ? (
-                <Dialog open={!isAuthenticated && !loginDialogOpen} onClose={() => setLoginDialogOpen(false)}>
-                    <DialogTitle>Login</DialogTitle>
-                    <DialogContent>
-                        <TextField
-                            label="Username"
-                            fullWidth
-                            margin="normal"
-                            value={username}
-                            onChange={(e) => setUsername(e.target.value)}
-                        />
-                        <TextField
-                            label="Password"
-                            type="password"
-                            fullWidth
-                            margin="normal"
-                            value={password}
-                            onChange={(e) => setPassword(e.target.value)}
-                        />
-                        {error && <Typography color="error">{error}</Typography>}
-                        {success && <Typography color="primary">{success}</Typography>}
-                    </DialogContent>
-                    <DialogActions>
-                        <Button onClick={handleLogin} color="primary">
-                            Login
-                        </Button>
-                        {/* <Button onClick={() => setLoginDialogOpen(true)} color="secondary">
-                            Register
-                        </Button> */}
-                    </DialogActions>
-                </Dialog>
-            ) : (
+            {isAuthenticated ? (
                 <div>
                     <div style={{ marginBottom: 20 }}>
                         <Button
                             variant="contained"
                             color="secondary"
-                            onClick={handleLogout}
+                            onClick={() => setIsAuthenticated(false)}
                             style={{ marginRight: 20 }}
                         >
                             Logout
@@ -187,12 +126,10 @@ const AdminPanel = () => {
                                     <TableRow key={item.id}>
                                         <TableCell>{item.id}</TableCell>
                                         <TableCell>{item.name}</TableCell>
-                                        <TableCell>{item.category}</TableCell>
+                                        <TableCell>{getCategoryName(item.category_id)}</TableCell> {/* Display category name */}
                                         <TableCell>{item.description}</TableCell>
                                         <TableCell>{item.tags}</TableCell>
                                         <TableCell>{item.price}</TableCell>
-                                        {/* <TableCell>{item.image_url}</TableCell> */}
-                                        {/* <TableCell>{item.}</TableCell> */}
                                         <TableCell>
                                             {item.image_url && <img src={item.image_url} alt={item.name} style={{ width: 50, height: 50 }} />}
                                         </TableCell>
@@ -214,8 +151,11 @@ const AdminPanel = () => {
                         item={currentItem}
                         onClose={() => setOpenDialog(false)}
                         onSave={handleSave}
+                        categories={categories} // Pass categories to ItemDialog
                     />
                 </div>
+            ) : (
+                <Typography variant="h6">Please log in to access the admin panel.</Typography>
             )}
         </Container>
     );
