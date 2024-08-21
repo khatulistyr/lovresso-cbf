@@ -4,6 +4,8 @@ import sqlite3
 import pandas as pd
 import os
 from werkzeug.utils import secure_filename
+from werkzeug.security import check_password_hash
+# from flask_jwt_extended import create_access_token
 from recommend import recommend_items
 from search import search_items, load_data
 from auth import auth_bp, db, login_manager
@@ -24,6 +26,53 @@ app.register_blueprint(auth_bp)
 UPLOAD_FOLDER = 'uploads'
 app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
 os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
+# from flask import Flask, request, jsonify
+# import sqlite3
+# from werkzeug.security import check_password_hash
+# import jwt
+# import datetime
+
+# @app.route('/auth/login', methods=['POST'])
+# @cross_origin()
+# def login():
+#     data = request.json
+#     username = data.get('username')
+#     password = data.get('password')
+
+#     # Connect to the database
+#     conn = sqlite3.connect('lovresso_db.db')
+#     cursor = conn.cursor()
+
+#     # Fetch the user from the database
+#     cursor.execute("SELECT user_name, user_password FROM user WHERE user_name = ?", (username,))
+#     user = cursor.fetchone()
+
+#     # Close the database connection
+#     conn.close()
+
+#     if user and check_password_hash(user[1], password):
+#         # Create JWT token
+#         payload = {
+#             'username': user[0],
+#             'exp': datetime.datetime.utcnow() + datetime.timedelta(hours=1)
+#         }
+#         token = jwt.encode(payload, app.config['SECRET_KEY'], algorithm='HS256')
+#         return jsonify({'token': token}), 200
+#     else:
+#         return jsonify({'error': 'Invalid username or password'}), 401
+
+@app.route('/auth/login', methods=['POST'])
+@cross_origin()
+def login():
+    data = request.json
+    username = data.get('username')
+    password = data.get('password')
+
+    if username == 'admin' and password == 'adminpassword':
+        return jsonify({'message': 'Login successful'}), 200
+    else:
+        return jsonify({'error': 'Invalid username or password'}), 401
 
 @app.route('/api/recommend', methods=['POST'])
 def recommend():

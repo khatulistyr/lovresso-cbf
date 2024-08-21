@@ -18,6 +18,11 @@ const AdminPanel = () => {
     const [openDialog, setOpenDialog] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
     const [isAuthenticated, setIsAuthenticated] = useState(false);
+    const [loginDialogOpen, setLoginDialogOpen] = useState(true);
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+    const [success, setSuccess] = useState('');
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -34,6 +39,35 @@ const AdminPanel = () => {
             axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/categories`).then(response => setCategories(response.data)); // Fetch categories
         }
     }, [isAuthenticated]);
+
+    const handleLogin = async () => {
+        try {
+            // const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/auth/login`, { username, password });
+            // const token = response.data.token;
+            const token = "faketoken";
+            localStorage.setItem('authToken', token);
+            axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
+            setSuccess('Login successful');
+            // setError('');
+            setIsAuthenticated(true);
+            setLoginDialogOpen(false);
+        } catch (err) {
+            setError('Invalid credentials');
+            setSuccess('');
+        }
+    };
+
+    const handleLogout = async () => {
+        try {
+            await axios.post(`${process.env.REACT_APP_API_BASE_URL}/auth/logout`);
+            localStorage.removeItem('authToken');
+            delete axios.defaults.headers.common['Authorization'];
+            setIsAuthenticated(false);
+            // navigate('/login'); // Redirect to login page or show login dialog
+        } catch (err) {
+            console.error('Logout failed', err);
+        }
+    };
 
     const handleAddClick = () => {
         setCurrentItem(null);
@@ -71,7 +105,7 @@ const AdminPanel = () => {
 
     const getCategoryName = (categoryId) => {
         const category = categories.find(category => category.category_id === categoryId);
-        return category ? category.category_name : `Unknown (ID: ${categoryId})`;
+        return category ? `${category.category_name} (ID: ${categoryId})` : `Unknown (ID: ${categoryId})`;
     };
 
     const filteredItems = items.filter(item => 
@@ -80,13 +114,41 @@ const AdminPanel = () => {
     
     return (
         <Container>
-            {isAuthenticated ? (
+            {!isAuthenticated ? (
+                <Dialog open={loginDialogOpen} onClose={() => setLoginDialogOpen(false)}>
+                    <DialogTitle>Login</DialogTitle>
+                    <DialogContent>
+                        <TextField
+                            label="Username"
+                            fullWidth
+                            margin="normal"
+                            value={username}
+                            onChange={(e) => setUsername(e.target.value)}
+                        />
+                        <TextField
+                            label="Password"
+                            type="password"
+                            fullWidth
+                            margin="normal"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                        />
+                        {error && <Typography color="error">{error}</Typography>}
+                        {success && <Typography color="primary">{success}</Typography>}
+                    </DialogContent>
+                    <DialogActions>
+                        <Button onClick={handleLogin} color="primary">
+                            Login
+                        </Button>
+                    </DialogActions>
+                </Dialog>
+            ) : (
                 <div>
                     <div style={{ marginBottom: 20 }}>
                         <Button
                             variant="contained"
                             color="secondary"
-                            onClick={() => setIsAuthenticated(false)}
+                            onClick={handleLogout}
                             style={{ marginRight: 20 }}
                         >
                             Logout
@@ -131,11 +193,11 @@ const AdminPanel = () => {
                                         <TableCell>{item.item_tags}</TableCell>
                                         <TableCell>{item.item_price}</TableCell>
                                         <TableCell>
-                                        {item.image_url ? (
-                                            <img src={`${process.env.REACT_APP_API_BASE_URL}${item.image_url}`} alt={item.item_name} style={{ width: 50, height: 50 }} />
-                                        ) : (
-                                            '-'
-                                        )}
+                                            {item.image_url ? (
+                                                <img src={`${process.env.REACT_APP_API_BASE_URL}${item.image_url}`} alt={item.item_name} style={{ width: 50, height: 50 }} />
+                                            ) : (
+                                                '-'
+                                            )}
                                         </TableCell>
                                         <TableCell>
                                             <IconButton onClick={() => handleEditClick(item)}>
@@ -158,8 +220,6 @@ const AdminPanel = () => {
                         categories={categories} // Pass categories to ItemDialog
                     />
                 </div>
-            ) : (
-                <Typography variant="h6">Please log in to access the admin panel.</Typography>
             )}
         </Container>
     );
