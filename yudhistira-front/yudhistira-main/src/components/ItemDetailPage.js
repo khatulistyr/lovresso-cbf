@@ -8,6 +8,13 @@ function ItemDetailPage({ item, onBack, debugMode, categoryName }) {
     const [categories, setCategories] = useState([]); // Added state for categories
     const [currentItem, setCurrentItem] = useState(item);
 
+    const handleClickScroll = (id) => {
+        const element = document.getElementById(id);
+        if (element) {
+          element.scrollIntoView({ behavior: "smooth" });
+        }
+    };
+
     const fetchRecommendations = async () => {
         try {
             const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/recommend`, {
@@ -25,6 +32,12 @@ function ItemDetailPage({ item, onBack, debugMode, categoryName }) {
     };
 
     useEffect(() => {
+        axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/categories`)
+            .then(response => setCategories(response.data))
+            .catch(error => console.error('Error fetching categories:', error));
+    }, []); 
+
+    useEffect(() => {
         fetchRecommendations();
     }, [currentItem.name]);
 
@@ -37,6 +50,7 @@ function ItemDetailPage({ item, onBack, debugMode, categoryName }) {
     const handleRecommendedItemClick = (recommendedItem) => {
         setCurrentItem(recommendedItem);
         fetchRecommendations();
+        handleClickScroll('currentItem'); // Scroll to the current item after a recommendation
     };
 
     return (
@@ -44,17 +58,18 @@ function ItemDetailPage({ item, onBack, debugMode, categoryName }) {
             <Button onClick={onBack} variant="text" color="primary" sx={{ mb: 2 }} startIcon={<ArrowBackIcon />}>
                 Kembali
             </Button>
-            <Card variant="outlined" sx={{ mb: 4 }} >
+            <Card variant="outlined" sx={{ mb: 4 }} id="currentItem" >
                 <CardMedia
                     component="img"
                     height="300"
                     image={`${process.env.REACT_APP_API_BASE_URL}${currentItem.image_url}`} // Main image
-                    alt={currentItem.name}
+                    alt={currentItem.item_name}
                 />
                 <CardContent>
-                    <Typography variant="h5" gutterBottom>
-                        {currentItem.name}
+                    <Typography variant="h5">
+                        {currentItem.item_name}
                     </Typography>
+                    <Typography variant="h6"> Rp. {currentItem.item_price}</Typography>
                     <Typography variant="body2"><strong>Category:</strong> {categoryName}</Typography>
                     <Typography variant="body2"><strong>Description:</strong> {currentItem.item_description}</Typography>
                     {/* Conditionally render Tags and Similarity Score based on Debug Mode */}
@@ -82,9 +97,10 @@ function ItemDetailPage({ item, onBack, debugMode, categoryName }) {
                             />
                             <CardContent>
                                 <Typography variant="h6">{recommendedItem.item_name}</Typography>
-                                <Typography variant="body2"><strong>Category:</strong> {recommendedItem.category_id}</Typography>
+                                <Typography variant="h6">Rp. {recommendedItem.item_price}</Typography>
+                                <Typography variant="body2"><strong>Category:</strong> {getCategoryName(recommendedItem.category_id)}</Typography>
                                 <Typography variant="body2"><strong>Description:</strong> {recommendedItem.item_description}</Typography>
-                                <Typography variant="body2"><strong>Price:</strong> {recommendedItem.item_price}</Typography>
+                                {/* <Typography variant="body2"><strong>Price:</strong> {recommendedItem.item_price}</Typography> */}
                                 {/* Conditionally render Tags and Similarity Score based on Debug Mode */}
                                 {debugMode && (
                                     <>
