@@ -5,6 +5,7 @@ import { Container } from '@mui/material';
 import ItemDetailPage from './components/ItemDetailPage';
 import AdminPanel from './components/AdminPanel';
 import MainPage from './MainPage';
+import PaymentForm from './components/PaymentForm';
 // import TestPage from './TestPage';
 // import { useAuth } from './useAuth'; // Custom hook for authentication
 
@@ -27,6 +28,7 @@ function App() {
                     <Route path="/" element={<MainPage />} />
                     {/* <Route path="/search" element={<SearchPage />} /> */}
                     <Route path="/item/:id" element={<ItemDetailPage />} />
+                    <Route path="/payment" element={<PaymentForm />} />
                     {/* <Route path="/test" element={<TestPage />} /> */}
                     {/* <Route path="/login" element={<LoginPage />} /> */}
                     {/* <Route path="/admin" element={isAuthenticated ? <AdminPanel /> : <Navigate to="/login" />} /> */}
