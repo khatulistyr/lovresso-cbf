@@ -15,8 +15,8 @@ function MainPage() {
             backgroundAttachment: 'fixed',
             minHeight: '100vh',
             minWidth: '100vw',
-            paddingTop: '20px',
-            paddingBottom: '20px',
+            // paddingTop: '20px',
+            // paddingBottom: '20px',
             backgroundColor: 'black',
             display: 'flex',
             alignItems: 'center',
@@ -25,7 +25,7 @@ function MainPage() {
             position: 'relative', // Make container relative for positioning checkbox
         }}>
             <Grid container spacing={0} direction="row">
-                <Grid item xs={6} md={orders.length > 0 ? 8 : 12}>
+                <Grid item xs={orders.length > 0 ? 6 : 12} md={orders.length > 0 ? 8 : 12}>
                     {/* <Typography variant="h4" style={{ marginBottom: '20px' }}>Search</Typography> */}
                     <SearchCard orders={orders} setOrders={setOrders} />
                 </Grid>

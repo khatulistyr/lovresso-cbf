@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from 'react';
 import axios from 'axios';
-import { Button, Typography, Card, CardContent, CardMedia, Grid, Box } from '@mui/material';
+import { Button, Typography, Card, CardContent, CardMedia, Grid, Box, Chip } from '@mui/material';
 import ArrowBackIcon from '@mui/icons-material/ArrowBack';
+import OrderButton from './OrderButton';
 
-function ItemDetailPage({ item, onBack, debugMode, categoryName }) {
+function ItemDetailPage({ item, onBack, debugMode, categoryName, orders, setOrders }) {
     const [recommendedItems, setRecommendedItems] = useState([]);
     const [categories, setCategories] = useState([]); // Added state for categories
     const [currentItem, setCurrentItem] = useState(item);
@@ -13,6 +14,25 @@ function ItemDetailPage({ item, onBack, debugMode, categoryName }) {
         if (element) {
           element.scrollIntoView({ behavior: "smooth" });
         }
+    };
+
+    const handleAddToOrder = (item) => {
+        console.log("Clicked on Add to Order for item:", item); // Debugging log
+        setOrders(prevOrders => {
+            const existingOrder = prevOrders.find(order => order.item_id === item.item_id);
+            if (existingOrder) {
+                console.log("Item already in order, increasing quantity.");
+                return prevOrders.map(order =>
+                    order.item_id === item.item_id
+                        ? { ...order, quantity: order.quantity + 1 }
+                        : order
+                );
+            } else {
+                console.log("Adding new item to order.");
+                return [...prevOrders, { ...item, item_id: item.item_id, quantity: 1 }];
+            }
+        });
+        console.log({orders})
     };
 
     const fetchRecommendations = async () => {
@@ -66,19 +86,18 @@ function ItemDetailPage({ item, onBack, debugMode, categoryName }) {
                     alt={currentItem.item_name}
                 />
                 <CardContent>
-                    <Typography variant="h5">
-                        {currentItem.item_name}
-                    </Typography>
-                    <Typography variant="h6"> Rp. {currentItem.item_price}</Typography>
-                    <Typography variant="body2"><strong>Category:</strong> {categoryName}</Typography>
-                    <Typography variant="body2"><strong>Description:</strong> {currentItem.item_description}</Typography>
-                    {/* Conditionally render Tags and Similarity Score based on Debug Mode */}
+                    <Typography variant="h4">{currentItem.item_name} <Chip label={getCategoryName(item.category_id)} variant="outlined" /></Typography>
+                    <Typography variant="h5" sx={{ mb: 1 }}>Rp. {currentItem.item_price}</Typography>
+                    {/* <Typography variant="body2"><strong>Description:</strong> {item.item_description}</Typography> */}
+                    <Typography variant="body2">{currentItem.item_description}</Typography>
                     {debugMode && (
                         <>
                             <Typography variant="body2"><strong>Tags:</strong> {currentItem.item_tags}</Typography>
-                            <Typography variant="body2"><strong>Similarity Score:</strong> {currentItem.score !== undefined ? currentItem.score.toFixed(4) : 'N/A'}</Typography>
+                            <Typography variant="body2"><strong>Tipe Search:</strong> {currentItem.score_type !== undefined ? currentItem.score_type : 'N/A'}</Typography>
+                            {currentItem.score !== 0 && (<Typography variant="body2"><strong>Skor TF-IDF:</strong> {currentItem.score !== undefined ? currentItem.score.toFixed(6) : 'N/A'}</Typography>)}
                         </>
                     )}
+                    <OrderButton item={currentItem} onAddToOrder={() => handleAddToOrder(currentItem)} />
                 </CardContent>
             </Card>
 
@@ -96,18 +115,18 @@ function ItemDetailPage({ item, onBack, debugMode, categoryName }) {
                                 alt={recommendedItem.item_name}
                             />
                             <CardContent>
-                                <Typography variant="h6">{recommendedItem.item_name}</Typography>
-                                <Typography variant="h6">Rp. {recommendedItem.item_price}</Typography>
-                                <Typography variant="body2"><strong>Category:</strong> {getCategoryName(recommendedItem.category_id)}</Typography>
-                                <Typography variant="body2"><strong>Description:</strong> {recommendedItem.item_description}</Typography>
-                                {/* <Typography variant="body2"><strong>Price:</strong> {recommendedItem.item_price}</Typography> */}
-                                {/* Conditionally render Tags and Similarity Score based on Debug Mode */}
+                                <Typography variant="h4">{recommendedItem.item_name} <Chip label={getCategoryName(recommendedItem.category_id)} variant="outlined" /></Typography>
+                                <Typography variant="h5" sx={{ mb: 1 }}>Rp. {recommendedItem.item_price}</Typography>
+                                {/* <Typography variant="body2"><strong>Description:</strong> {item.item_description}</Typography> */}
+                                <Typography variant="body2">{recommendedItem.item_description}</Typography>
                                 {debugMode && (
                                     <>
                                         <Typography variant="body2"><strong>Tags:</strong> {recommendedItem.item_tags}</Typography>
-                                        <Typography variant="body2"><strong>Similarity Score:</strong> {recommendedItem.score !== undefined ? recommendedItem.score.toFixed(4) : 'N/A'}</Typography>
+                                        <Typography variant="body2"><strong>Tipe Search:</strong> {recommendedItem.score_type !== undefined ? recommendedItem.score_type : 'N/A'}</Typography>
+                                        {recommendedItem.score !== 0 && (<Typography variant="body2"><strong>Skor TF-IDF:</strong> {recommendedItem.score !== undefined ? recommendedItem.score.toFixed(6) : 'N/A'}</Typography>)}
                                     </>
                                 )}
+                                <OrderButton item={recommendedItem} onAddToOrder={() => handleAddToOrder(recommendedItem)} />
                             </CardContent>
                         </Card>
                     </Grid>

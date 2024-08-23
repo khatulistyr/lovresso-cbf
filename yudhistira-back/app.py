@@ -62,6 +62,38 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 #     else:
 #         return jsonify({'error': 'Invalid username or password'}), 401
 
+def create_tables():
+    conn = sqlite3.connect('lovresso_db.db')
+    cursor = conn.cursor()
+
+    # Create the order table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS `order` (
+            order_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            total_price REAL
+        )
+    ''')
+
+    # Create the order_item table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS `order_item` (
+            order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER,
+            item_id INTEGER,
+            quantity INTEGER,
+            item_price REAL,
+            FOREIGN KEY(order_id) REFERENCES `order`(order_id),
+            FOREIGN KEY(item_id) REFERENCES item(item_id)
+        )
+    ''')
+
+    conn.commit()
+    conn.close()
+
+create_tables()
+
+
 @app.route('/auth/login', methods=['POST'])
 @cross_origin()
 def login():
@@ -169,6 +201,38 @@ def upload_file():
 @cross_origin()
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
+
+@app.route('/api/orders', methods=['POST'])
+@cross_origin()
+def create_order():
+    data = request.json
+    order_items = data.get('orders', [])
+    
+    if not order_items:
+        return jsonify({'error': 'No items in the order'}), 400
+    
+    total_price = sum(item['item_price'] * item['quantity'] for item in order_items)
+    
+    conn = sqlite3.connect('lovresso_db.db')
+    cursor = conn.cursor()
+
+    # Insert into order table
+    cursor.execute('''
+        INSERT INTO `order` (total_price) VALUES (?)
+    ''', (total_price,))
+    order_id = cursor.lastrowid
+
+    # Insert into order_item table
+    for item in order_items:
+        cursor.execute('''
+            INSERT INTO order_item (order_id, item_id, quantity, item_price)
+            VALUES (?, ?, ?, ?)
+        ''', (order_id, item['item_id'], item['quantity'], item['item_price']))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({'message': 'Order created successfully', 'order_id': order_id})
 
 
 if __name__ == '__main__':

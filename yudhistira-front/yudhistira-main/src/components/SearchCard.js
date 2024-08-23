@@ -105,7 +105,7 @@ function SearchCard({ orders, setOrders }) {
 
     return (
         <Container>
-            {!showSearchResults && (
+            {!showSearchResults &&  (
             <div>
                 <Typography variant="h2" style={{ marginBottom: '0px', color: 'white' }}>
                     {"Tempat nyari "}
@@ -193,7 +193,7 @@ function SearchCard({ orders, setOrders }) {
 
                     <CardContent style={{ overflowY: 'auto' }}>
                         {selectedItem ? (
-                            <ItemDetailPage item={selectedItem} onBack={() => setSelectedItem(null)} debugMode={debugMode} categoryName={getCategoryName(selectedItem.category_id)}/>
+                            <ItemDetailPage item={selectedItem} onBack={() => setSelectedItem(null)} debugMode={debugMode} categoryName={getCategoryName(selectedItem.category_id)} orders={orders} setOrders={setOrders}/>
                         ) : (
                             <div>
                                 {searchResults.length === 0 ? (
