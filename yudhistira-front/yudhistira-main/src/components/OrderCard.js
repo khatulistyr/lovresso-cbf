@@ -40,36 +40,57 @@ function OrderCard({ orders, setOrders }) {
         setOrders(prevOrders => prevOrders.filter(order => order.item_id !== itemId));
     };
 
+    // const getSubTotalPrice = () => {
+    //     return Math.ceil(orders.reduce((total, order) => total + order.item_price * order.quantity));
+    // };
+
+    const testOrderContent = async () => {
+        console.log(orders)
+    }
+
     const getSubTotalPrice = () => {
         return Math.ceil(orders.reduce((total, order) => total + order.item_price * order.quantity, 0) / 100) * 100;
     };
     
+    // const getTotalPrice = () => {
+    //     return Math.ceil(orders.reduce((total, order) => (total + order.item_price * order.quantity) * 1.1, 0) / 100) * 100;
+    // };
+
     const getTotalPrice = () => {
-        return Math.ceil(orders.reduce((total, order) => (total + order.item_price * order.quantity) * 1.1, 0) / 100) * 100;
+        const subTotal = orders.reduce((total, order) => total + order.item_price * order.quantity, 0);
+        const totalPrice = subTotal * 1.1; // Apply the 10% fee to the entire subtotal
+        return Math.ceil(totalPrice / 100) * 100;
     };
+    
 
     const handleProceed = async () => {
         if (orders.length > 0) {
             try {
+                // Create order in your backend
                 const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/api/orders`, {
                     orders: orders
-                }, {
-                    headers: {
-                        'Content-Type': 'application/json'
-                    }
                 });
-                console.log(response.data);
-                // Navigate to the payment route with the current orders
-                navigate('/payment');
+    
+                // Extract order ID and amount
+                const orderID = response.data.order_id;  // Ensure your backend returns this
+                const grossAmount = getTotalPrice();
+    
+                console.log(`DEB: ${orderID} ${grossAmount}`);
+
+                // Proceed to payment page with the correct order ID and amount
+                navigate('/payment', { state: { orderID, grossAmount } });
             } catch (error) {
                 console.error('Error creating order:', error);
             }
         }
     };
+    
 
     return (
-        <Card variant="outlined" style={{ padding: '0 10px 0 10px', maxHeight: '95vh' }}>
-            <Typography variant='h5' marginTop={1} marginLeft={1}>
+        <Container style={{padding: '0'}}>
+        <Card variant="outlined" style={{ maxHeight: '95vh'}}>
+            {/* <Button variant="outlined" onClick={testOrderContent}>TestOrder</Button> */}
+            <Typography variant='h5' marginTop={1} marginLeft={2}>
                 Daftar Pesanan
             </Typography>
             <CardContent>
@@ -126,6 +147,7 @@ function OrderCard({ orders, setOrders }) {
                 )}
             </CardContent>
         </Card>
+        </Container>
     );
 }
 

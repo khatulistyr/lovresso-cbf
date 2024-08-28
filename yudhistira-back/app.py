@@ -10,6 +10,10 @@ from recommend import recommend_items
 from search import search_items, load_data
 from auth import auth_bp, db, login_manager
 import secrets
+import json
+
+import base64
+import requests
 
 app = Flask(__name__)
 # CORS(app=app, resources={r"*": {"origins": "*"}}, support_credentials=True)
@@ -234,6 +238,54 @@ def create_order():
 
     return jsonify({'message': 'Order created successfully', 'order_id': order_id})
 
+MIDTRANS_SERVER_KEY = 'SB-Mid-server-1U-m4rJaXKXuqVzEj_BQSIRI'
+MIDTRANS_BASE_URL = 'https://api.sandbox.midtrans.com/v2/charge'
+
+@app.route('/api/transaction', methods=['POST'])
+def create_transaction():
+    data = request.json
+    order_id = data.get('order_id')
+    gross_amount = data.get('gross_amount')
+
+    # Define Midtrans request body
+    payload = {
+        "transaction_details": {
+            "order_id": order_id,
+            "gross_amount": gross_amount
+        },
+        "customer_details": {
+            "first_name": "Budi",
+            "last_name": "Utomo",
+            "email": "budi.utomo@example.com",
+            "phone": "08111222333"
+        },
+        "enabled_payments": ["gopay", "bank_transfer"]
+    }
+
+    # Midtrans API request
+    headers = {
+        'Authorization': f'Basic {base64.b64encode((MIDTRANS_SERVER_KEY + ":").encode()).decode()}',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    }
+
+    try:
+        response = requests.post(
+            MIDTRANS_BASE_URL,
+            headers=headers,
+            data=json.dumps(payload)
+        )
+        response_data = response.json()
+
+        # Log the response for debugging
+        print(response_data)
+
+        # Return the response to the front end
+        return jsonify(response_data)
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return jsonify({"error": "Failed to create transaction"}), 500
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000, debug=True)

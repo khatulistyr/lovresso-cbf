@@ -5,7 +5,7 @@ import AddIcon from '@mui/icons-material/Add';
 function OrderButton({ onAddToOrder }) {
     return (
         <Button
-            variant="text"
+            variant="outlined"
             color="primary"
             onClick={(e) => {
                 e.stopPropagation(); // Prevent triggering the card's onClick
@@ -17,6 +17,7 @@ function OrderButton({ onAddToOrder }) {
         >
             Tambah ke pesanan
         </Button>
+        // <div style={{padding: "10px", backgroundColor: "black", color: "white"}}>Button</div>
     );
 }
 

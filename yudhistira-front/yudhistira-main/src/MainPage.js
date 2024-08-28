@@ -31,7 +31,7 @@ function MainPage() {
                 </Grid>
                 {
                     orders.length > 0 && (
-                        <Grid item xs={6} md={4}>
+                        <Grid item xs={6} md={4} paddingTop={2}>
                             {/* <Typography variant="h4" style={{ marginBottom: '20px' }}>Pesanan</Typography> */}
                             <OrderCard orders={orders} setOrders={setOrders} />
                         </Grid>
