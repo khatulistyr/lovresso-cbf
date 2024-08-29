@@ -46,21 +46,11 @@ def suggest_query(query, item_names):
         item_words.add(name.lower())
     
     # Find close matches to the query using individual words and full item names
-    matches = get_close_matches(query, item_words, n=1, cutoff=0.0)
+    matches = get_close_matches(query, item_words, n=1, cutoff=0)
     return matches[0] if matches else None
 
-def search_items(query, df, top_n=10):
-    df['item_features'] = df['item_name'] + ' ' + df['item_description'] + ' ' + df['item_tags'].fillna('')
-    vectorizer = TfidfVectorizer()
-    tfidf_matrix = vectorizer.fit_transform(df['item_features'])
-
-    # Suggested query based on closest item_name word or full name
-    suggested_query = suggest_query(query, df['item_name'].tolist())
-    
-    # Use suggested query if available, otherwise use original query
-    search_query = suggested_query if suggested_query else query
-
-    query_vec = vectorizer.transform([search_query])
+def perform_cbf_search(query, df, vectorizer, tfidf_matrix, top_n=10):
+    query_vec = vectorizer.transform([query])
     cosine_similarities = cosine_similarity(query_vec, tfidf_matrix).flatten()
     df['score'] = cosine_similarities
     df['score_type'] = 'CBF / TF-IDF'
@@ -75,12 +65,30 @@ def search_items(query, df, top_n=10):
             same_category_df['score_type'] = 'Kategori Similar'
             search_results_df = pd.concat([search_results_df, same_category_df])
 
+    return search_results_df.drop_duplicates(subset=['item_name']).head(top_n)
+
+def search_items(query, df, top_n=10):
+    df['item_features'] = df['item_name'] + ' ' + df['item_description'] + ' ' + df['item_tags'].fillna('')
+    vectorizer = TfidfVectorizer()
+    tfidf_matrix = vectorizer.fit_transform(df['item_features'])
+
+    # Perform CBF search
+    search_results_df = perform_cbf_search(query, df, vectorizer, tfidf_matrix, top_n)
+    
+    # If not enough results, use suggested query as a fallback
+    if len(search_results_df) < top_n:
+        suggested_query = suggest_query(query, df['item_name'].tolist())
+        if suggested_query:
+            fallback_results_df = perform_cbf_search(suggested_query, df, vectorizer, tfidf_matrix, top_n)
+            search_results_df = pd.concat([search_results_df, fallback_results_df]).drop_duplicates(subset=['item_name']).head(top_n)
+            suggested_query = suggested_query  # Update the suggested query
+
     search_results_df = search_results_df.drop_duplicates(subset=['item_name']).head(top_n)
     
     # Add suggested_query to each result if available
     search_results = search_results_df.to_dict(orient='records')
     for result in search_results:
-        result['suggested_query'] = suggested_query
+        result['suggested_query'] = suggested_query if 'suggested_query' in locals() else None
 
     return search_results
 

@@ -18,8 +18,8 @@ function SearchCard({ orders, setOrders }) {
     const [selectedCategory, setSelectedCategory] = useState(null);
     // const [selectedCategory, setSelectedCategory] = useState(1);
     const [showMenu, setShowMenu] = useState(true); // Default to showing the menu
-    // const [debugMode, setDebugMode] = useState(true);
-    const [debugMode, setDebugMode] = useState(false);
+    const [debugMode, setDebugMode] = useState(true);
+    // const [debugMode, setDebugMode] = useState(false);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
