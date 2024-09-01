@@ -1,9 +1,11 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes, Navigate } from 'react-router-dom';
 import { Container } from '@mui/material';
-import SearchPage from './SearchPage';
-import ItemDetailPage from './ItemDetailPage';
+// import SearchPage from './SearchPage';
+import ItemDetailPage from './components/ItemDetailPage';
 import AdminPanel from './components/AdminPanel';
+import MainPage from './MainPage';
+import PaymentForm from './components/PaymentForm';
 // import TestPage from './TestPage';
 // import { useAuth } from './useAuth'; // Custom hook for authentication
 
@@ -23,8 +25,10 @@ function App() {
                 }}
             >
                 <Routes>
-                    <Route path="/" element={<SearchPage />} />
+                    <Route path="/" element={<MainPage />} />
+                    {/* <Route path="/search" element={<SearchPage />} /> */}
                     <Route path="/item/:id" element={<ItemDetailPage />} />
+                    <Route path="/payment" element={<PaymentForm />} />
                     {/* <Route path="/test" element={<TestPage />} /> */}
                     {/* <Route path="/login" element={<LoginPage />} /> */}
                     {/* <Route path="/admin" element={isAuthenticated ? <AdminPanel /> : <Navigate to="/login" />} /> */}

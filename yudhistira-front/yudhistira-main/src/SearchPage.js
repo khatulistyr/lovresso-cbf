@@ -1,10 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import { Container, TextField, Typography, Card, CardContent, CardMedia, Grid, Stack, IconButton, InputAdornment, CircularProgress, Checkbox, FormControlLabel } from '@mui/material';
-import ItemDetailPage from './ItemDetailPage';
+import ItemDetailPage from './components/ItemDetailPage';
 import SearchIcon from '@mui/icons-material/Search';
 import ClearIcon from '@mui/icons-material/Clear';
 import { TextLoop } from 'easy-react-text-loop';
+
+import OrderButton from './components/OrderButton';
+import OrderFab from './components/OrderFab';
 
 function SearchPage() {
     const [searchQuery, setSearchQuery] = useState('');
@@ -13,7 +16,8 @@ function SearchPage() {
     const [showSearchResults, setShowSearchResults] = useState(false);
     const [categories, setCategories] = useState([]); 
     const [selectedItem, setSelectedItem] = useState(null);
-    const [debugMode, setDebugMode] = useState(true);
+    // const [debugMode, setDebugMode] = useState(true);
+    const [debugMode, setDebugMode] = useState(false);
     const [loading, setLoading] = useState(false); // Loading state
 
     useEffect(() => {
@@ -25,6 +29,17 @@ function SearchPage() {
             .then(response => setCategories(response.data))
             .catch(error => console.error('Error fetching categories:', error));
     }, []); 
+
+    const [orders, setOrders] = useState([]);
+
+    const handleAddToOrder = (item) => {
+        const existingOrder = orders.find(order => order.id === item.id);
+        if (existingOrder) {
+            setOrders(orders.map(order => order.id === item.id ? { ...order, count: order.count + 1 } : order));
+        } else {
+            setOrders([...orders, { ...item, count: 1 }]);
+        }
+    };
 
     const handleSearch = async () => {
         try {
@@ -122,6 +137,20 @@ function SearchPage() {
                     borderRadius: '4px',
                     padding: '5px',
                 }}
+            />
+
+            <OrderFab 
+                style={{
+                    position: 'absolute',
+                    top: 10,
+                    right: 10,
+                    // color: 'white',
+                    backgroundColor: 'white', // Add a slight background for better visibility
+                    borderRadius: '4px',
+                    padding: '5px',
+                }}
+                orders={orders}
+                onProceedToPayment={() => { /* Handle order submission */ }}
             />
 
             <Container maxWidth="md">
@@ -245,6 +274,7 @@ function SearchPage() {
                                                                         {item.score !== 0 && (<Typography variant="body2"><strong>Skor TF-IDF:</strong> {item.score !== undefined ? item.score.toFixed(6) : 'N/A'}</Typography>)}
                                                                     </>
                                                                 )}
+                                                                <OrderButton item={item} onAddToOrder={handleAddToOrder} />
                                                             </CardContent>
                                                         </Card>
                                                     </Grid>

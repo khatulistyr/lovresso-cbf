@@ -10,6 +10,10 @@ from recommend import recommend_items
 from search import search_items, load_data
 from auth import auth_bp, db, login_manager
 import secrets
+import json
+
+import base64
+import requests
 
 app = Flask(__name__)
 # CORS(app=app, resources={r"*": {"origins": "*"}}, support_credentials=True)
@@ -61,6 +65,38 @@ os.makedirs(UPLOAD_FOLDER, exist_ok=True)
 #         return jsonify({'token': token}), 200
 #     else:
 #         return jsonify({'error': 'Invalid username or password'}), 401
+
+def create_tables():
+    conn = sqlite3.connect('lovresso_db.db')
+    cursor = conn.cursor()
+
+    # Create the order table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS `order` (
+            order_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+            total_price REAL
+        )
+    ''')
+
+    # Create the order_item table
+    cursor.execute('''
+        CREATE TABLE IF NOT EXISTS `order_item` (
+            order_item_id INTEGER PRIMARY KEY AUTOINCREMENT,
+            order_id INTEGER,
+            item_id INTEGER,
+            quantity INTEGER,
+            item_price REAL,
+            FOREIGN KEY(order_id) REFERENCES `order`(order_id),
+            FOREIGN KEY(item_id) REFERENCES item(item_id)
+        )
+    ''')
+
+    conn.commit()
+    conn.close()
+
+create_tables()
+
 
 @app.route('/auth/login', methods=['POST'])
 @cross_origin()
@@ -170,6 +206,86 @@ def upload_file():
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
+@app.route('/api/orders', methods=['POST'])
+@cross_origin()
+def create_order():
+    data = request.json
+    order_items = data.get('orders', [])
+    
+    if not order_items:
+        return jsonify({'error': 'No items in the order'}), 400
+    
+    total_price = sum(item['item_price'] * item['quantity'] for item in order_items)
+    
+    conn = sqlite3.connect('lovresso_db.db')
+    cursor = conn.cursor()
+
+    # Insert into order table
+    cursor.execute('''
+        INSERT INTO `order` (total_price) VALUES (?)
+    ''', (total_price,))
+    order_id = cursor.lastrowid
+
+    # Insert into order_item table
+    for item in order_items:
+        cursor.execute('''
+            INSERT INTO order_item (order_id, item_id, quantity, item_price)
+            VALUES (?, ?, ?, ?)
+        ''', (order_id, item['item_id'], item['quantity'], item['item_price']))
+
+    conn.commit()
+    conn.close()
+
+    return jsonify({'message': 'Order created successfully', 'order_id': order_id})
+
+MIDTRANS_SERVER_KEY = 'SB-Mid-server-1U-m4rJaXKXuqVzEj_BQSIRI'
+MIDTRANS_BASE_URL = 'https://api.sandbox.midtrans.com/v2/charge'
+
+@app.route('/api/transaction', methods=['POST'])
+def create_transaction():
+    data = request.json
+    order_id = data.get('order_id')
+    gross_amount = data.get('gross_amount')
+
+    # Define Midtrans request body
+    payload = {
+        "transaction_details": {
+            "order_id": order_id,
+            "gross_amount": gross_amount
+        },
+        "customer_details": {
+            "first_name": "Budi",
+            "last_name": "Utomo",
+            "email": "budi.utomo@example.com",
+            "phone": "08111222333"
+        },
+        "enabled_payments": ["gopay", "bank_transfer"]
+    }
+
+    # Midtrans API request
+    headers = {
+        'Authorization': f'Basic {base64.b64encode((MIDTRANS_SERVER_KEY + ":").encode()).decode()}',
+        'Content-Type': 'application/json',
+        'Accept': 'application/json',
+    }
+
+    try:
+        response = requests.post(
+            MIDTRANS_BASE_URL,
+            headers=headers,
+            data=json.dumps(payload)
+        )
+        response_data = response.json()
+
+        # Log the response for debugging
+        print(response_data)
+
+        # Return the response to the front end
+        return jsonify(response_data)
+
+    except Exception as e:
+        print(f"Error: {str(e)}")
+        return jsonify({"error": "Failed to create transaction"}), 500
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000, debug=True)

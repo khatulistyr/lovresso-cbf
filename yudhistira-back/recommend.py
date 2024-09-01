@@ -63,7 +63,7 @@ def recommend_items(item_name, df, top_n=4):
 
     cosine_similarities = cosine_similarity(tfidf_matrix[item_idx], tfidf_matrix).flatten()
     df['score'] = cosine_similarities
-    df['score_type'] = 'cbf'
+    df['score_type'] = 'CBF'
 
     # Filter out the item itself
     recommended_df = df[(df['score'] > 0) & (df.index != item_idx)].sort_values(by='score', ascending=False)
