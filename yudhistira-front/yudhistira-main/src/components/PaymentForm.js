@@ -1,57 +1,138 @@
-import React, { useState } from 'react';
-import axios from 'axios';
-import { Stack, Button, Input, Typography } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Button, Typography, Container, Box } from '@mui/material';
+import { useNavigate, useLocation } from 'react-router-dom';
+import RefreshIcon from '@mui/icons-material/Refresh';
+import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
 
-const PaymentForm = () => {
-  const [orderID, setOrderID] = useState('');
-  const [grossAmount, setGrossAmount] = useState('');
+function PaymentForm() {
+    const navigate = useNavigate();
+    const location = useLocation();
+    const paymentResponse = location.state?.paymentResponse;
 
-  const handlePayment = async () => {
-    try {
-      const response = await axios.post('/api/transaction', {
-        order_id: orderID,
-        gross_amount: grossAmount,
-      });
+    const [qrCodeUrl, setQrCodeUrl] = useState('');
 
-      // Handle Midtrans response
-      console.log(response.data);
+    useEffect(() => {
+        if (paymentResponse) {
+            const qrCodeAction = paymentResponse.actions.find(action => action.name === 'generate-qr-code');
+            if (qrCodeAction) {
+                setQrCodeUrl(qrCodeAction.url);
+            }
+        }
+    }, [paymentResponse]);
 
-      // Redirect to payment URL or show payment instruction
-      if (response.data.redirect_url) {
-        window.location.href = response.data.redirect_url;
-      } else {
-        // Handle other types of responses, e.g., QR codes for GoPay
-        alert("Payment Instructions: " + JSON.stringify(response.data));
-      }
-    } catch (error) {
-      console.error('Payment Error:', error);
+    const handleRegenerateQR = () => {
+        const qrCodeAction = paymentResponse.actions.find(action => action.name === 'generate-qr-code');
+        if (qrCodeAction) {
+            setQrCodeUrl(qrCodeAction.url);
+        }
+    };
+
+    const handleDeeplinkRedirect = (url) => {
+      window.open(url, "_blank");
+    };
+
+    const handleGetStatus = (url) => {
+        window.open(url, "_blank");
+    };
+
+    const handleCancelTransaction = (url) => {
+        window.open(url, "_blank");
+    };
+
+    if (!paymentResponse) {
+        return <Typography variant="h6">Payment details are not available.</Typography>;
     }
-  };
 
-  return (
-    <Stack direction="column" spacing={2}>
-      <Typography variant='h4'>Midtrans Payment Gateway (Sandbox)</Typography>
-      <Typography>
-        {orderID}
-      </Typography>
-      <Typography>
-        {grossAmount}
-      </Typography>
-      {/* <Input
-        type="text"
-        placeholder="Order ID"
-        value={orderID}
-        onChange={(e) => setOrderID(e.target.value)}
-      />
-      <Input
-        type="number"
-        placeholder="Amount"
-        value={grossAmount}
-        onChange={(e) => setGrossAmount(e.target.value)}
-      /> */}
-      <Button variant="contained" onClick={handlePayment}>Bayar</Button>
-    </Stack>
-  );
-};
+    const { transaction_status, gross_amount, actions, expiry_time } = paymentResponse;
+
+    return (
+        <Container
+            maxWidth="sm"
+            sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                justifyContent: 'space-between',
+                maxHeight: '60vh',
+                minHeight: '80vh',
+                paddingY: 0,
+                paddingX: 0,
+                boxSizing: 'border-box',
+                margin: 0,
+            }}
+        >
+            <Typography variant="h5" align="center" gutterBottom>
+                Status: <strong>{transaction_status || 'N/A'}</strong>
+            </Typography>
+            <Typography variant="h6" align="center" gutterBottom>
+                Jumlah: <strong>Rp. {gross_amount || 'N/A'}</strong>
+            </Typography>
+            <Typography variant="body1" align="center" gutterBottom>
+                Batal otomatis pada: <strong>{expiry_time || 'N/A'}</strong>
+            </Typography>
+
+            <Box
+                sx={{
+                    flex: 1,
+                    display: 'flex',
+                    justifyContent: 'center',
+                    alignItems: 'center',
+                    marginY: 2,
+                }}
+            >
+                {qrCodeUrl && (
+                    <img
+                        src={qrCodeUrl}
+                        alt="QR Code"
+                        style={{
+                            maxWidth: '60%',
+                            maxHeight: '60%',
+                            objectFit: 'contain',
+                        }}
+                    />
+                )}
+            </Box>
+
+            <Box sx={{ textAlign: 'center', marginTop: 0 }}>
+                <Button
+                    variant="contained"
+                    onClick={handleRegenerateQR}
+                    sx={{ margin: 1 }}
+                    startIcon={<RefreshIcon/>}
+                >
+                    Refresh QR
+                </Button>
+                <Button
+                    variant="outlined"
+                    onClick={() => handleDeeplinkRedirect(paymentResponse.actions.find(action => action.name === 'deeplink-redirect').url)}
+                    sx={{ margin: 1 }}
+                    startIcon={<AccountBalanceWalletIcon/>}
+                >
+                    Bayar pada aplikasi
+                </Button>
+                {/* <Button
+                    variant="contained"
+                    onClick={() => handleGetStatus(paymentResponse.actions.find(action => action.name === 'get-status').url)}
+                    sx={{ margin: 1 }}
+                >
+                    Get Status
+                </Button> */}
+                {/* <Button
+                    variant="outlined"
+                    color="error"
+                    onClick={() => handleCancelTransaction(paymentResponse.actions.find(action => action.name === 'cancel').url)}
+                    sx={{ margin: 1 }}
+                >
+                    Cancel
+                </Button> */}
+            </Box>
+
+            {/* <Box sx={{ textAlign: 'center', marginTop: 2 }}>
+                <Button variant="contained" color="secondary" onClick={() => navigate('/')}>
+                    Kembali
+                </Button>
+            </Box> */}
+        </Container>
+    );
+}
 
 export default PaymentForm;

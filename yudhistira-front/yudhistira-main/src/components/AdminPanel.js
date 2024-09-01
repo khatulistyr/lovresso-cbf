@@ -1,19 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import {
     Button, TextField, Dialog, DialogActions, DialogContent, DialogTitle,
-    IconButton, Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper,
-    Typography, Container
+    Typography, Container, Tabs, Tab, Box
 } from '@mui/material';
 import AddIcon from '@mui/icons-material/Add';
-import EditIcon from '@mui/icons-material/Edit';
-import DeleteIcon from '@mui/icons-material/Delete';
 import axios from 'axios';
 import ItemDialog from './ItemDialog';
+import ItemTable from './ItemTable';
+import CategoryTable from './CategoryTable';
+import OrderTable from './OrderTable';
 import { useNavigate } from 'react-router-dom';
 
 const AdminPanel = () => {
     const [items, setItems] = useState([]);
-    const [categories, setCategories] = useState([]); // Added state for categories
+    const [categories, setCategories] = useState([]);
     const [search, setSearch] = useState('');
     const [openDialog, setOpenDialog] = useState(false);
     const [currentItem, setCurrentItem] = useState(null);
@@ -23,6 +23,7 @@ const AdminPanel = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const [success, setSuccess] = useState('');
+    const [tabIndex, setTabIndex] = useState(0); // State for managing the current tab
     const navigate = useNavigate();
 
     useEffect(() => {
@@ -36,19 +37,16 @@ const AdminPanel = () => {
     useEffect(() => {
         if (isAuthenticated) {
             axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/items`).then(response => setItems(response.data));
-            axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/categories`).then(response => setCategories(response.data)); // Fetch categories
+            axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/categories`).then(response => setCategories(response.data));
         }
     }, [isAuthenticated]);
 
     const handleLogin = async () => {
         try {
-            // const response = await axios.post(`${process.env.REACT_APP_API_BASE_URL}/auth/login`, { username, password });
-            // const token = response.data.token;
             const token = "faketoken";
             localStorage.setItem('authToken', token);
             axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
             setSuccess('Login successful');
-            // setError('');
             setIsAuthenticated(true);
             setLoginDialogOpen(false);
         } catch (err) {
@@ -63,7 +61,6 @@ const AdminPanel = () => {
             localStorage.removeItem('authToken');
             delete axios.defaults.headers.common['Authorization'];
             setIsAuthenticated(false);
-            // navigate('/login'); // Redirect to login page or show login dialog
         } catch (err) {
             console.error('Logout failed', err);
         }
@@ -86,9 +83,9 @@ const AdminPanel = () => {
     };
 
     const handleSave = (item) => {
-        if (item.item_id) {  // Check for item_id instead of id
+        if (item.item_id) {
             axios.put(`${process.env.REACT_APP_API_BASE_URL}/api/items/${item.item_id}`, item).then(() => {
-                setItems(items.map(i => (i.item_id === item.item_id ? item : i)));  // Use item_id for comparison
+                setItems(items.map(i => (i.item_id === item.item_id ? item : i)));
                 setOpenDialog(false);
             });
         } else {
@@ -97,23 +94,18 @@ const AdminPanel = () => {
                 setOpenDialog(false);
             });
         }
-    };      
+    };
 
     const handleSearchChange = (event) => {
         setSearch(event.target.value);
     };
 
-    const getCategoryName = (categoryId) => {
-        const category = categories.find(category => category.category_id === categoryId);
-        return category ? `${category.category_name} (ID: ${categoryId})` : `Unknown (ID: ${categoryId})`;
-    };
-
     const filteredItems = items.filter(item => 
         item.item_name && item.item_name.toLowerCase().includes(search.toLowerCase())
     );
-    
+
     return (
-        <Container style={{padding: '10px'}}>
+        <Container style={{ padding: '10px' }}>
             {!isAuthenticated ? (
                 <Dialog open={loginDialogOpen} onClose={() => setLoginDialogOpen(false)}>
                     <DialogTitle>Login</DialogTitle>
@@ -153,71 +145,48 @@ const AdminPanel = () => {
                         >
                             Logout
                         </Button>
-                        <TextField
+                        {/* <TextField
                             label="Search"
                             variant="outlined"
                             value={search}
                             onChange={handleSearchChange}
                             style={{ marginRight: 20 }}
-                        />
-                        <Button
-                            variant="contained"
-                            color="primary"
-                            startIcon={<AddIcon />}
-                            onClick={handleAddClick}
-                        >
-                            Add Item
-                        </Button>
+                        /> */}
                     </div>
-                    <TableContainer component={Paper}>
-                        <Table>
-                            <TableHead>
-                                <TableRow>
-                                    <TableCell>ID</TableCell>
-                                    <TableCell>Name</TableCell>
-                                    <TableCell>Category</TableCell>
-                                    <TableCell>Description</TableCell>
-                                    <TableCell>Tags</TableCell>
-                                    <TableCell>Price</TableCell>
-                                    <TableCell>Image</TableCell>
-                                    <TableCell>Actions</TableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {filteredItems.map((item) => (
-                                    <TableRow key={item.id}>
-                                        <TableCell>{item.item_id}</TableCell>
-                                        <TableCell>{item.item_name}</TableCell>
-                                        <TableCell>{getCategoryName(item.category_id)}</TableCell>
-                                        <TableCell>{item.item_description}</TableCell>
-                                        <TableCell>{item.item_tags}</TableCell>
-                                        <TableCell>{item.item_price}</TableCell>
-                                        <TableCell>
-                                            {item.image_url ? (
-                                                <img src={`${process.env.REACT_APP_API_BASE_URL}${item.image_url}`} alt={item.item_name} style={{ width: 50, height: 50 }} />
-                                            ) : (
-                                                'None'
-                                            )}
-                                        </TableCell>
-                                        <TableCell>
-                                            <IconButton onClick={() => handleEditClick(item)}>
-                                                <EditIcon />
-                                            </IconButton>
-                                            <IconButton onClick={() => handleDeleteClick(item.item_id)}>
-                                                <DeleteIcon />
-                                            </IconButton>
-                                        </TableCell>
-                                    </TableRow>
-                                ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
+                    <Box>
+                        <Tabs
+                            value={tabIndex}
+                            onChange={(event, newValue) => setTabIndex(newValue)}
+                            variant="fullWidth"
+                            textColor="primary"
+                            indicatorColor="primary"
+                        >
+                            <Tab label="Items" />
+                            <Tab label="Categories" />
+                            <Tab label="Orders" />
+                        </Tabs>
+                        <div role="tabpanel" hidden={tabIndex !== 0}>
+                            <ItemTable
+                                items={filteredItems}
+                                categories={categories}
+                                onEditClick={handleEditClick}
+                                onDeleteClick={handleDeleteClick}
+                                handleAddClick={handleAddClick}
+                            />
+                        </div>
+                        <div role="tabpanel" hidden={tabIndex !== 1}>
+                            <CategoryTable />
+                        </div>
+                        <div role="tabpanel" hidden={tabIndex !== 2}>
+                            <OrderTable />
+                        </div>
+                    </Box>
                     <ItemDialog
                         open={openDialog}
                         item={currentItem}
                         onClose={() => setOpenDialog(false)}
                         onSave={handleSave}
-                        categories={categories} // Pass categories to ItemDialog
+                        categories={categories}
                     />
                 </div>
             )}
