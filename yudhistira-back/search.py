@@ -20,17 +20,20 @@ from nltk.stem import PorterStemmer
 stemmer = PorterStemmer()
 
 def preprocess_text(text):
+    print(f"Original text: {text}")
     text = text.lower()
     text = re.sub(r'\W+', ' ', text)
     tokens = word_tokenize(text)
     tokens = [word for word in tokens if word not in stopwords]
     tokens = [stemmer.stem(word) for word in tokens]
-    return ' '.join(tokens)
+    processed_text = ' '.join(tokens)
+    print(f"Processed text: {processed_text}")
+    return processed_text
 
 def load_data():
     conn = sqlite3.connect('lovresso_db.db')
     df = pd.read_sql_query("SELECT * FROM item", conn)
-    df['item_features'] = df['item_description'] + ' ' + df['item_tags']
+    df['item_features'] = df['item_name'] + ' ' + df['item_description'] + ' ' + df['item_tags']
     conn.close()
     return df
 
@@ -38,15 +41,24 @@ def preprocess_query(query):
     query = query.replace('*', '.*').replace('?', '.')
     return query
 
-def suggest_query(query, item_names):
-    # Break down item names into individual words and include full item names
+def suggest_query(query, item_features):
     item_words = set()
-    for name in item_names:
-        item_words.update(name.split())
-        item_words.add(name.lower())
+    for features in item_features:
+        item_words.update(features.split())
+        item_words.add(features.lower())
     
-    # Find close matches to the query using individual words and full item names
-    matches = get_close_matches(query, item_words, n=1, cutoff=0)
+    item_words_b = set()
+    item_words_c = set()
+    for word in item_words:
+        cleaned_word = word.replace(',', '').lower()
+        item_words_b.add(cleaned_word)
+        for split_word in cleaned_word.split(' '):
+            item_words_c.add(split_word)
+
+    print(f"Item words: {item_words_c}")  # Print the full word list
+    
+    matches = get_close_matches(query, item_words_c, n=1, cutoff=0)
+    print(f"Query: {query}, Matches: {matches}")
     return matches[0] if matches else None
 
 def perform_cbf_search(query, df, vectorizer, tfidf_matrix, top_n=10):
@@ -68,7 +80,6 @@ def perform_cbf_search(query, df, vectorizer, tfidf_matrix, top_n=10):
     return search_results_df.drop_duplicates(subset=['item_name']).head(top_n)
 
 def search_items(query, df, top_n=10):
-    df['item_features'] = df['item_name'] + ' ' + df['item_description'] + ' ' + df['item_tags'].fillna('')
     vectorizer = TfidfVectorizer()
     tfidf_matrix = vectorizer.fit_transform(df['item_features'])
 
@@ -76,12 +87,15 @@ def search_items(query, df, top_n=10):
     search_results_df = perform_cbf_search(query, df, vectorizer, tfidf_matrix, top_n)
     
     # If not enough results, use suggested query as a fallback
-    if len(search_results_df) < top_n:
-        suggested_query = suggest_query(query, df['item_name'].tolist())
-        if suggested_query:
-            fallback_results_df = perform_cbf_search(suggested_query, df, vectorizer, tfidf_matrix, top_n)
-            search_results_df = pd.concat([search_results_df, fallback_results_df]).drop_duplicates(subset=['item_name']).head(top_n)
-            suggested_query = suggested_query  # Update the suggested query
+    df['item_features'] = df['item_name'] + ' ' + df['item_description'] + ' ' + df['item_tags'].fillna('')
+    df['item_features_nodesc'] = df['item_name'] + ' ' + df['item_tags'].fillna('')
+    print(df['item_features_nodesc'])
+    suggested_query = suggest_query(query, df['item_features_nodesc'].tolist())
+
+    # Skip fallback if suggested query is the same as the original query
+    if len(search_results_df) < top_n and suggested_query and suggested_query != query:
+        fallback_results_df = perform_cbf_search(suggested_query, df, vectorizer, tfidf_matrix, top_n)
+        search_results_df = pd.concat([search_results_df, fallback_results_df])
 
     search_results_df = search_results_df.drop_duplicates(subset=['item_name']).head(top_n)
     
