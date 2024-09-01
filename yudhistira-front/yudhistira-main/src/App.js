@@ -6,6 +6,7 @@ import ItemDetailPage from './components/ItemDetailPage';
 import AdminPanel from './components/AdminPanel';
 import MainPage from './MainPage';
 import PaymentForm from './components/PaymentForm';
+import PaymentDebug from './components/PaymentDebug';
 // import TestPage from './TestPage';
 // import { useAuth } from './useAuth'; // Custom hook for authentication
 
@@ -29,6 +30,7 @@ function App() {
                     {/* <Route path="/search" element={<SearchPage />} /> */}
                     <Route path="/item/:id" element={<ItemDetailPage />} />
                     <Route path="/payment" element={<PaymentForm />} />
+                    <Route path="/paymenttest" element={<PaymentDebug />} />
                     {/* <Route path="/test" element={<TestPage />} /> */}
                     {/* <Route path="/login" element={<LoginPage />} /> */}
                     {/* <Route path="/admin" element={isAuthenticated ? <AdminPanel /> : <Navigate to="/login" />} /> */}

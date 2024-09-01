@@ -16,8 +16,8 @@ import base64
 import requests
 
 app = Flask(__name__)
-# CORS(app=app, resources={r"*": {"origins": "*"}}, support_credentials=True)
-CORS(app)
+CORS(app=app, resources={r"*": {"origins": "*"}}, support_credentials=True)
+# CORS(app)
 
 app.config['SECRET_KEY'] = secrets.token_hex(24)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///lovresso_db.db'
@@ -111,6 +111,7 @@ def login():
         return jsonify({'error': 'Invalid username or password'}), 401
 
 @app.route('/api/recommend', methods=['POST'])
+@cross_origin()
 def recommend():
     data = request.json
     item_name = data.get('item_name')
@@ -119,6 +120,7 @@ def recommend():
     return jsonify(recommended)
 
 @app.route('/api/search', methods=['POST'])
+@cross_origin()
 def search():
     data = request.get_json()
     query = data.get('query', '')
@@ -150,7 +152,41 @@ def get_categories():
     categories = df.to_dict(orient='records')
     return jsonify(categories)
 
+@app.route('/api/categories', methods=['POST'])
+@cross_origin()
+def add_category():
+    data = request.json
+    conn = sqlite3.connect('lovresso_db.db')
+    cursor = conn.cursor()
+    cursor.execute("INSERT INTO category (category_name) VALUES (?)", (data['category_name'],))
+    conn.commit()
+    category_id = cursor.lastrowid
+    conn.close()
+    return jsonify({'category_id': category_id, **data})
+
+@app.route('/api/categories/<int:category_id>', methods=['PUT'])
+@cross_origin()
+def update_category(category_id):
+    data = request.json
+    conn = sqlite3.connect('lovresso_db.db')
+    cursor = conn.cursor()
+    cursor.execute("UPDATE category SET category_name = ? WHERE category_id = ?", (data['category_name'], category_id))
+    conn.commit()
+    conn.close()
+    return jsonify({'message': 'Category updated successfully'})
+
+@app.route('/api/categories/<int:category_id>', methods=['DELETE'])
+@cross_origin()
+def delete_category(category_id):
+    conn = sqlite3.connect('lovresso_db.db')
+    cursor = conn.cursor()
+    cursor.execute("DELETE FROM category WHERE category_id = ?", (category_id,))
+    conn.commit()
+    conn.close()
+    return jsonify({'message': 'Category deleted'})
+
 @app.route('/api/items/<int:item_id>', methods=['PUT'])
+@cross_origin()
 def update_item(item_id):
     conn = sqlite3.connect('lovresso_db.db')
     cursor = conn.cursor()
@@ -168,7 +204,6 @@ def update_item(item_id):
     return jsonify({'message': 'Item updated successfully'})
 
 @app.route('/api/items/<int:item_id>', methods=['DELETE'])
-# @cross_origin(origin='*')
 @cross_origin()
 def delete_item(item_id):
     conn = sqlite3.connect('lovresso_db.db')
@@ -179,7 +214,6 @@ def delete_item(item_id):
     return jsonify({'message': 'Item deleted'})
 
 @app.route('/api/items', methods=['GET'])
-# @cross_origin(origin='*')
 @cross_origin()
 def get_items():
     conn = sqlite3.connect('lovresso_db.db')
@@ -210,7 +244,7 @@ def uploaded_file(filename):
 @cross_origin()
 def create_order():
     data = request.json
-    order_items = data.get('orders', [])
+    order_items = data.get('items', [])
     
     if not order_items:
         return jsonify({'error': 'No items in the order'}), 400
@@ -220,13 +254,11 @@ def create_order():
     conn = sqlite3.connect('lovresso_db.db')
     cursor = conn.cursor()
 
-    # Insert into order table
     cursor.execute('''
         INSERT INTO `order` (total_price) VALUES (?)
     ''', (total_price,))
     order_id = cursor.lastrowid
 
-    # Insert into order_item table
     for item in order_items:
         cursor.execute('''
             INSERT INTO order_item (order_id, item_id, quantity, item_price)
@@ -238,54 +270,66 @@ def create_order():
 
     return jsonify({'message': 'Order created successfully', 'order_id': order_id})
 
+@app.route('/api/orders', methods=['GET'])
+@cross_origin()
+def get_orders():
+    conn = sqlite3.connect('lovresso_db.db')
+    query = '''
+        SELECT o.order_id, o.order_date, o.total_price, 
+               oi.item_id, oi.quantity, oi.item_price
+        FROM `order` o
+        LEFT JOIN order_item oi ON o.order_id = oi.order_id
+    '''
+    df = pd.read_sql_query(query, conn)
+    conn.close()
+    
+    grouped_orders = {}
+    for index, row in df.iterrows():
+        order_id = row['order_id']
+        if order_id not in grouped_orders:
+            grouped_orders[order_id] = {
+                'order_id': order_id,
+                'order_date': row['order_date'],
+                'total_price': row['total_price'],
+                'items': []
+            }
+        if not pd.isna(row['item_id']):  # Check if item_id is not NaN
+            grouped_orders[order_id]['items'].append({
+                'item_id': row['item_id'],
+                'quantity': row['quantity'],
+                'item_price': row['item_price']
+            })
+    
+    orders = list(grouped_orders.values())
+    
+    return jsonify(orders)
+
 MIDTRANS_SERVER_KEY = 'SB-Mid-server-1U-m4rJaXKXuqVzEj_BQSIRI'
+MIDTRANS_CLIENT_KEY = 'SB-Mid-client-RKFDd0g5ryehgdvy'
 MIDTRANS_BASE_URL = 'https://api.sandbox.midtrans.com/v2/charge'
 
 @app.route('/api/transaction', methods=['POST'])
+@cross_origin()
 def create_transaction():
     data = request.json
     order_id = data.get('order_id')
     gross_amount = data.get('gross_amount')
 
-    # Define Midtrans request body
     payload = {
+        "payment_type": "gopay",
         "transaction_details": {
             "order_id": order_id,
-            "gross_amount": gross_amount
+            "gross_amount": gross_amount,
         },
-        "customer_details": {
-            "first_name": "Budi",
-            "last_name": "Utomo",
-            "email": "budi.utomo@example.com",
-            "phone": "08111222333"
-        },
-        "enabled_payments": ["gopay", "bank_transfer"]
     }
 
-    # Midtrans API request
     headers = {
-        'Authorization': f'Basic {base64.b64encode((MIDTRANS_SERVER_KEY + ":").encode()).decode()}',
+        'Authorization': f'Basic {base64.b64encode(f"{MIDTRANS_SERVER_KEY}:".encode()).decode()}',
         'Content-Type': 'application/json',
-        'Accept': 'application/json',
     }
 
-    try:
-        response = requests.post(
-            MIDTRANS_BASE_URL,
-            headers=headers,
-            data=json.dumps(payload)
-        )
-        response_data = response.json()
-
-        # Log the response for debugging
-        print(response_data)
-
-        # Return the response to the front end
-        return jsonify(response_data)
-
-    except Exception as e:
-        print(f"Error: {str(e)}")
-        return jsonify({"error": "Failed to create transaction"}), 500
+    response = requests.post(MIDTRANS_BASE_URL, json=payload, headers=headers)
+    return jsonify(response.json())
 
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000, debug=True)

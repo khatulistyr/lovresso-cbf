@@ -206,23 +206,23 @@ function SearchCard({ orders, setOrders }) {
                                                 alt={item.name}
                                             />
                                             <CardContent style={{ flexGrow: 1, display: 'flex', flexDirection: 'column' }}>
-                                                <Container disableGutters='true'>
-                                                    <Container style={{ flexGrow: 1 }} disableGutters='true'>
-                                                        <Typography variant="h4">{item.item_name} <Chip label={getCategoryName(item.category_id)} variant="outlined" /></Typography>
-                                                        <Typography variant="h5" sx={{ mb: 1 }}>Rp. {item.item_price}</Typography>
-                                                        <Typography variant="body2">{item.item_description}</Typography>
-                                                        {debugMode && (
-                                                            <>
-                                                                <Typography variant="body2"><strong>Suggested Query:</strong> {item.suggested_query}</Typography>
-                                                                <Typography variant="body2"><strong>Tags:</strong> {item.item_tags}</Typography>
-                                                                <Typography variant="body2"><strong>Tipe Search:</strong> {item.score_type !== undefined ? item.score_type : 'N/A'}</Typography>
-                                                                {item.score !== 0 && (<Typography variant="body2"><strong>Skor TF-IDF:</strong> {item.score !== undefined ? item.score.toFixed(6) : 'N/A'}</Typography>)}
-                                                            </>
-                                                        )}
-                                                    </Container>
-                                                    <Container disableGutters='true' sx={{ marginTop: 2 }}>
-                                                        <OrderButton item={item} onAddToOrder={() => handleAddToOrder(item)} />
-                                                    </Container>
+                                                <Container style={{ flexGrow: 1, marginBottom: 2 }} disableGutters={true}>
+                                                    <Typography variant="h4">
+                                                        {item.item_name} <Chip label={getCategoryName(item.category_id)} variant="outlined" />
+                                                    </Typography>
+                                                    <Typography variant="h5" sx={{ mb: 1 }}>Rp. {item.item_price}</Typography>
+                                                    <Typography variant="body2">{item.item_description}</Typography>
+                                                    {debugMode && (
+                                                        <>
+                                                            <Typography variant="body2"><strong>Suggested Query:</strong> {item.suggested_query}</Typography>
+                                                            <Typography variant="body2"><strong>Tags:</strong> {item.item_tags}</Typography>
+                                                            <Typography variant="body2"><strong>Tipe Search:</strong> {item.score_type !== undefined ? item.score_type : 'N/A'}</Typography>
+                                                            {item.score !== 0 && (<Typography variant="body2"><strong>Skor TF-IDF:</strong> {item.score !== undefined ? item.score.toFixed(6) : 'N/A'}</Typography>)}
+                                                        </>
+                                                    )}
+                                                </Container>
+                                                <Container style={{marginTop: 5}} disableGutters={true}>
+                                                    <OrderButton item={item} onAddToOrder={() => handleAddToOrder(item)} />
                                                 </Container>
                                             </CardContent>
                                         </Card>
@@ -259,11 +259,21 @@ function SearchCard({ orders, setOrders }) {
                                                     image={`${process.env.REACT_APP_API_BASE_URL}${item.image_url}`}
                                                     alt={item.name}
                                                 />
-                                                <CardContent>
-                                                    <Typography variant="h4">{item.item_name}</Typography>
-                                                    <Typography variant="h5" sx={{ mb: 1 }}>Rp. {item.item_price}</Typography>
-                                                    <Typography variant="body2">{item.item_description}</Typography>
-                                                    <Container disableGutters='true' sx={{ marginTop: 2 }}>
+                                                <CardContent style={{ display: 'flex', flexDirection: 'column' }}>
+                                                    <Container style={{ flex: 1 }} disableGutters={true}>
+                                                        <Typography variant="h4">
+                                                            {item.item_name}
+                                                        </Typography>
+                                                        <Typography variant="h5" sx={{ mb: 1 }}>Rp. {item.item_price}</Typography>
+                                                        <Typography variant="body2">{item.item_description}</Typography>
+                                                        {debugMode && (
+                                                            <>
+                                                                <Typography variant="body2"><strong>Suggested Query:</strong> {item.suggested_query}</Typography>
+                                                                <Typography variant="body2"><strong>Tags:</strong> {item.item_tags}</Typography>
+                                                            </>
+                                                        )}
+                                                    </Container>
+                                                    <Container disableGutters={true} sx={{ marginTop: 1 }}>
                                                         <OrderButton item={item} onAddToOrder={() => handleAddToOrder(item)} />
                                                     </Container>
                                                 </CardContent>
