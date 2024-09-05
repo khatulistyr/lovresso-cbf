@@ -80,8 +80,10 @@ def perform_cbf_search(query, df, vectorizer, tfidf_matrix, top_n=10):
     return search_results_df.drop_duplicates(subset=['item_name']).head(top_n)
 
 def search_items(query, df, top_n=10):
+    # vectorize
     vectorizer = TfidfVectorizer()
     tfidf_matrix = vectorizer.fit_transform(df['item_features'])
+    print(f"MATRIX: \n{tfidf_matrix}")
 
     # Perform CBF search
     search_results_df = perform_cbf_search(query, df, vectorizer, tfidf_matrix, top_n)

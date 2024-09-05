@@ -304,8 +304,10 @@ def get_orders():
     
     return jsonify(orders)
 
-MIDTRANS_SERVER_KEY = 'SB-Mid-server-1U-m4rJaXKXuqVzEj_BQSIRI'
-MIDTRANS_CLIENT_KEY = 'SB-Mid-client-RKFDd0g5ryehgdvy'
+MIDTRANS_SERVER_KEY = 'SB-Mid-server-YUNmW-plW5srGNQk8MbYWEFN'
+# MIDTRANS_SERVER_KEY = 'SB-Mid-server-1U-m4rJaXKXuqVzEj_BQSIRI'
+MIDTRANS_CLIENT_KEY = 'SB-Mid-client-x5KNGLq6iZiJNjEE'
+# MIDTRANS_CLIENT_KEY = 'SB-Mid-client-RKFDd0g5ryehgdvy'
 MIDTRANS_BASE_URL = 'https://api.sandbox.midtrans.com/v2/charge'
 
 @app.route('/api/transaction', methods=['POST'])

@@ -65,6 +65,7 @@ function PaymentForm() {
             </Typography>
             <Typography variant="h6" align="center" gutterBottom>
                 Jumlah: <strong>Rp. {gross_amount || 'N/A'}</strong>
+                {/* Jumlah: <strong>Rp. 20.000</strong> */}
             </Typography>
             <Typography variant="body1" align="center" gutterBottom>
                 Batal otomatis pada: <strong>{expiry_time || 'N/A'}</strong>

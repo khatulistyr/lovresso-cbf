@@ -30,9 +30,8 @@ function MainPage() {
                     <SearchCard orders={orders} setOrders={setOrders} />
                 </Grid>
                 {
-                    orders.length > 0 && (
+                    orders.length > 0 && ( // kalau ada order, tampilkan ordercard
                         <Grid item xs={6} md={4} paddingTop={2}>
-                            {/* <Typography variant="h4" style={{ marginBottom: '20px' }}>Pesanan</Typography> */}
                             <OrderCard orders={orders} setOrders={setOrders} />
                         </Grid>
                     )

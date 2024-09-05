@@ -22,7 +22,7 @@ function SearchCard({ orders, setOrders }) {
     // const [debugMode, setDebugMode] = useState(false);
     const [loading, setLoading] = useState(false);
 
-    useEffect(() => {
+    useEffect(() => { // saat load, get data items dan categories dari server backend
         axios.get(`${process.env.REACT_APP_API_BASE_URL}/api/items`)
             .then(response => setItems(response.data))
             .catch(error => console.error('Error fetching items:', error));
@@ -133,7 +133,7 @@ function SearchCard({ orders, setOrders }) {
     return (
         <Container sx={{padding: "0"}}>
             <Stack direction="row" spacing={2} alignItems="center" m={2} style={{ position: 'sticky', zIndex: 1 }}>
-                <TextField
+                <TextField // search field
                     autoComplete="off"
                     variant="outlined"
                     fullWidth
