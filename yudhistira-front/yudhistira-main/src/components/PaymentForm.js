@@ -3,12 +3,14 @@ import { Button, Typography, Container, Box } from '@mui/material';
 import { useNavigate, useLocation } from 'react-router-dom';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import AccountBalanceWalletIcon from '@mui/icons-material/AccountBalanceWallet';
+import axios from 'axios';
 
 function PaymentForm() {
     const navigate = useNavigate();
     const location = useLocation();
     const paymentResponse = location.state?.paymentResponse;
 
+    const [transactionStatus, setTransactionStatus] = useState(paymentResponse?.transaction_status || 'pending');
     const [qrCodeUrl, setQrCodeUrl] = useState('');
 
     useEffect(() => {
@@ -20,6 +22,25 @@ function PaymentForm() {
         }
     }, [paymentResponse]);
 
+    useEffect(() => {
+        // Polling every 5 seconds
+        const interval = setInterval(() => {
+            if (paymentResponse?.order_id) {
+                axios
+                    .get(`${process.env.REACT_APP_API_BASE_URL}/api/transaction/status/${paymentResponse.order_id}`)
+                    .then((res) => {
+                        setTransactionStatus(res.data.transaction_status || 'pending');
+                    })
+                    .catch((err) => {
+                        console.error('Error fetching transaction status:', err);
+                    });
+            }
+        }, 5000);
+
+        // Clean up the interval when the component unmounts
+        return () => clearInterval(interval);
+    }, [paymentResponse]);
+
     const handleRegenerateQR = () => {
         const qrCodeAction = paymentResponse.actions.find(action => action.name === 'generate-qr-code');
         if (qrCodeAction) {
@@ -28,14 +49,6 @@ function PaymentForm() {
     };
 
     const handleDeeplinkRedirect = (url) => {
-      window.open(url, "_blank");
-    };
-
-    const handleGetStatus = (url) => {
-        window.open(url, "_blank");
-    };
-
-    const handleCancelTransaction = (url) => {
         window.open(url, "_blank");
     };
 
@@ -43,7 +56,28 @@ function PaymentForm() {
         return <Typography variant="h6">Payment details are not available.</Typography>;
     }
 
-    const { transaction_status, gross_amount, actions, expiry_time } = paymentResponse;
+    const { gross_amount, expiry_time } = paymentResponse;
+
+    // Define status styles
+    const getStatusStyle = () => {
+        if (transactionStatus === 'pending') {
+            return { color: '#D5A420', fontWeight: 'bold' };
+        } else if (transactionStatus === 'settlement') {
+            return { color: 'darkgreen', fontWeight: 'bold' };
+        } else {
+            return { color: 'black', fontWeight: 'normal' };
+        }
+    };
+
+    const getDisplayStatus = () => {
+        if (transactionStatus === 'pending') {
+            return 'Pending';
+        } else if (transactionStatus === 'settlement') {
+            return 'Terbayar';
+        } else {
+            return transactionStatus || 'N/A';
+        }
+    };
 
     return (
         <Container
@@ -61,7 +95,7 @@ function PaymentForm() {
             }}
         >
             <Typography variant="h5" align="center" gutterBottom>
-                Status: <strong>{transaction_status || 'N/A'}</strong>
+                Status: <span style={getStatusStyle()}><strong>{getDisplayStatus()}</strong></span>
             </Typography>
             <Typography variant="h6" align="center" gutterBottom>
                 Jumlah: <strong>Rp. {gross_amount || 'N/A'}</strong>
@@ -97,7 +131,7 @@ function PaymentForm() {
                     variant="contained"
                     onClick={handleRegenerateQR}
                     sx={{ margin: 1 }}
-                    startIcon={<RefreshIcon/>}
+                    startIcon={<RefreshIcon />}
                 >
                     Refresh QR
                 </Button>
@@ -105,32 +139,11 @@ function PaymentForm() {
                     variant="outlined"
                     onClick={() => handleDeeplinkRedirect(paymentResponse.actions.find(action => action.name === 'deeplink-redirect').url)}
                     sx={{ margin: 1 }}
-                    startIcon={<AccountBalanceWalletIcon/>}
+                    startIcon={<AccountBalanceWalletIcon />}
                 >
                     Bayar pada aplikasi
                 </Button>
-                {/* <Button
-                    variant="contained"
-                    onClick={() => handleGetStatus(paymentResponse.actions.find(action => action.name === 'get-status').url)}
-                    sx={{ margin: 1 }}
-                >
-                    Get Status
-                </Button> */}
-                {/* <Button
-                    variant="outlined"
-                    color="error"
-                    onClick={() => handleCancelTransaction(paymentResponse.actions.find(action => action.name === 'cancel').url)}
-                    sx={{ margin: 1 }}
-                >
-                    Cancel
-                </Button> */}
             </Box>
-
-            {/* <Box sx={{ textAlign: 'center', marginTop: 2 }}>
-                <Button variant="contained" color="secondary" onClick={() => navigate('/')}>
-                    Kembali
-                </Button>
-            </Box> */}
         </Container>
     );
 }

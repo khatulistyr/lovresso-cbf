@@ -331,5 +331,18 @@ def create_transaction():
     response = requests.post(MIDTRANS_BASE_URL, json=payload, headers=headers)
     return jsonify(response.json())
 
+@app.route('/api/transaction/status/<order_id>', methods=['GET'])
+@cross_origin()
+def get_transaction_status(order_id):
+    status_url = f'https://api.sandbox.midtrans.com/v2/{order_id}/status'
+
+    headers = {
+        'Authorization': f'Basic {base64.b64encode(f"{MIDTRANS_SERVER_KEY}:".encode()).decode()}',
+        'Content-Type': 'application/json',
+    }
+
+    response = requests.get(status_url, headers=headers)
+    return jsonify(response.json())
+
 if __name__ == '__main__':
     app.run(host='127.0.0.1', port=5000, debug=True)
